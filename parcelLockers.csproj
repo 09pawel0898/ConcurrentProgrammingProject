@@ -55,6 +55,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Animator.cs" />
+    <Compile Include="src\SharedResources.cs" />
+    <Compile Include="src\Person.cs" />
     <Compile Include="src\Defines.cs" />
     <Compile Include="src\ParcelLocker.cs" />
     <Compile Include="src\Resources.cs" />
@@ -104,6 +107,18 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\parcelLocker.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\car.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\background.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\matBack.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\matBack2.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

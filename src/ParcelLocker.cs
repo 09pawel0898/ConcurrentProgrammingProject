@@ -8,7 +8,7 @@ using System.Windows.Controls;
 using System.Threading;
 using System.Windows.Threading;
 
-namespace paczkomaty
+namespace ParcelLockers
 {
     class Cell
     {
@@ -34,7 +34,7 @@ namespace paczkomaty
             };
             m_Context.Children.Add(Img);
             Canvas.SetTop(Img, 1*30 + m_Pos.y*30);
-            Canvas.SetLeft(Img, 1*50 + parcelLockerOffset.x + m_Pos.y*50);
+            Canvas.SetLeft(Img, 1*50 + parcelLockerOffset.x + m_Pos.x*50);
         }
     }
     class ParcelLocker
@@ -54,11 +54,20 @@ namespace paczkomaty
         {
             for(int i = 0; i < Defines.numCellsInRow; i++)
             {
-                for(int j = 0; j < Defines.numCellsInRow; j++)
+                for(int j = 0; j < Defines.numCellsInColumn; j++)
                 {
-                    m_Cells.Add(new Cell(m_Context,new Coord(i,j),m_Offset));
+                    if(i != 3 || !(j==3 || j==4 || j==5))
+                        m_Cells.Add(new Cell(m_Context,new Coord(i,j),m_Offset));
                 }
             }
+
+            m_Cells[5].Img.Source = new BitmapImage(Resources.Instance.Cells[1]);
+            m_Cells[6].Img.Source = new BitmapImage(Resources.Instance.Cells[1]);
+            m_Cells[7].Img.Source = new BitmapImage(Resources.Instance.Cells[1]);
+            m_Cells[20].Img.Source = new BitmapImage(Resources.Instance.Cells[1]);
+            m_Cells[21].Img.Source = new BitmapImage(Resources.Instance.Cells[1]);
+            m_Cells[37].Img.Source = new BitmapImage(Resources.Instance.Cells[1]);
+            m_Cells[38].Img.Source = new BitmapImage(Resources.Instance.Cells[1]);
         }
     }
 }

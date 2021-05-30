@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace paczkomaty
+namespace ParcelLockers
 {
 
     public partial class MainWindow : Window
@@ -22,13 +22,9 @@ namespace paczkomaty
         public MainWindow()
         {
             InitializeComponent();
-            m_Simulation = new Simulation(MainCanvas);
+            m_Simulation = new Simulation(MainCanvas,this);
         }
 
-        private void B1OnClick(object sender, RoutedEventArgs e)
-        {
-
-        }
         private void ProgramExit(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Environment.Exit(0);

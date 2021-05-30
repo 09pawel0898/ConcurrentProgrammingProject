@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace paczkomaty
+namespace ParcelLockers
 {
     enum UriType
     {
@@ -45,13 +45,13 @@ namespace paczkomaty
                     cellsUris.Add(uri);
                     break;
                 case UriType.PARCELLOCKER:
-                    cellsUris.Add(uri);
+                    parcelLockerUris.Add(uri);
                     break;
                 case UriType.PERSON:
-                    cellsUris.Add(uri);
+                    peopleUris.Add(uri);
                     break;
                 case UriType.COURIER:
-                    cellsUris.Add(uri);
+                    courierUris.Add(uri);
                     break;
             }
         }
