@@ -56,6 +56,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Animator.cs" />
+    <Compile Include="src\Courier.cs" />
+    <Compile Include="src\Human.cs" />
     <Compile Include="src\SharedResources.cs" />
     <Compile Include="src\Person.cs" />
     <Compile Include="src\Defines.cs" />
@@ -119,6 +121,11 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\matBack2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\patBack1.png" />
+    <Resource Include="Resources\patLeft1.png" />
+    <Resource Include="Resources\patRight1.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

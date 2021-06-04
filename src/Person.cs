@@ -10,48 +10,121 @@ using System.Windows.Threading;
 
 namespace ParcelLockers
 {
-    class Person
+    enum PersonAction
     {
-        private static int ID = 0;
-        private Thread m_personThread;
-        private Canvas m_Context;
-        private Animator m_Animator;
-        private int m_Id;
-        public Image Img { get; set; }
+        SENDING,
+        PICKINGUP
+    };
 
+    class Person : Human
+    {
         public Person(Canvas context)
         {
-            m_Id = ID++;
-            m_Context = context;
             m_Animator = new Animator(2, Resources.Instance.People);
+            m_Context = context;
 
-            Img = new Image
+            SharedResources.SafeSharedResourceOperation.WaitOne();
+            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
             {
-                Width = 90,
-                Height = 200,
-                Name = "P"+m_Id,
-                Source = new BitmapImage(Resources.Instance.People[0])
-            };
+                Img = new Image
+                {
+                    Width = 80,
+                    Height = 200,
+                    Name = "P"+m_Id,
+                    Source = new BitmapImage(Resources.Instance.People[4])
+                };
+                m_Context.Children.Add(Img);
+                Canvas.SetLeft(Img, Defines.sidewalkSpawnPos.x);
+                Canvas.SetTop(Img, Defines.sidewalkSpawnPos.y);
+            }));
+            SharedResources.SafeSharedResourceOperation.ReleaseMutex();
 
-            m_Context.Children.Add(Img);
-            Canvas.SetTop(Img, 360);
-            Canvas.SetLeft(Img, 185 );
-            m_personThread = new Thread(Simulate);
-            m_personThread.Start();
+            m_currentPos = new Coord(Defines.sidewalkSpawnPos.x, Defines.sidewalkSpawnPos.y);
+            m_Thread = new Thread(Simulate);
+            m_Thread.Start();
         }
 
         private void Simulate()
         {
-            while(true)
-            {
-                Thread.Sleep(200);
+            Random rand = new Random();
+            PersonAction action;
 
-                SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+            while (true)
+            {
+                // Decide what to do in the current loop
+                int randomNum = rand.Next(0, 100);
+                action = (randomNum < 100) ?  PersonAction.SENDING : PersonAction.PICKINGUP;
+
+                // two action types (sending or picking up a parcel)
+                switch (action)
                 {
-                    Img.Source = m_Animator.updateImg();
-                }));
-                
+                    case PersonAction.SENDING:      SimulateSendingParcel();    break;
+                    case PersonAction.PICKINGUP:    SimulatePickingUpParcel();  break;
+                }
+                FadeOut();
+                // Sleep for some time
+                Thread.Sleep(rand.Next(1000, 4000));
             }
+        }
+        private void SimulateSendingParcel()
+        {
+            int parcelLockerId = ParcelLocker.GetRandomParcelLockerId();
+            //int parcelLockerId = 0;
+            m_queueId = parcelLockerId;
+            GoToProperParcelLockerPath(parcelLockerId);
+            TryToQueueUpAndPickUpTheParcel(parcelLockerId);
+        }
+
+        private void SimulatePickingUpParcel()
+        {
+
+        }
+
+        private void GoToProperParcelLockerPath(int pId)
+        {
+            while (m_currentPos.x != Defines.parcelLockerPos[pId].x)
+            {
+                Thread.Sleep(2);
+                MovePerson(new Coord(1,0));
+            }
+        }
+
+        private void TryToQueueUpAndPickUpTheParcel(int pId)
+        {
+            m_waitingInQueue = true;
+            SharedResources.SafeSharedResourceOperation.WaitOne();
+            m_posInQueue = SharedResources.NumPeopleInQueue[pId];
+            
+            SharedResources.PlacesTakenInQueue[pId,SharedResources.NumPeopleInQueue[pId]] = true;
+            SharedResources.NumPeopleInQueue[pId]++;
+            SharedResources.SafeSharedResourceOperation.ReleaseMutex();
+
+            SharedResources.Screen.WaitOne();
+            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                Img.Source = new BitmapImage(Resources.Instance.People[2]);
+                Canvas.SetZIndex(Img, ZIndexGen++);
+            }));
+            SharedResources.Screen.ReleaseMutex();
+
+            
+            Monitor.Enter(SharedResources.ParcelLockers[pId]);
+            try
+            {
+                // waiting to get to the first position
+                while(!m_cameToTheParcelLocker) { }
+                // taking selected actions on a shared resource
+                Thread.Sleep(4000);
+                SharedResources.ParcelLockers[pId].PutParcelToRandomCell();
+            }
+            finally { Monitor.Exit(SharedResources.ParcelLockers[pId]); }
+
+            m_waitingInQueue = false;
+            m_cameToTheParcelLocker = false;
+            SharedResources.SafeSharedResourceOperation.WaitOne();
+            SharedResources.PlacesTakenInQueue[pId, 0] = false;
+            SharedResources.NumPeopleInQueue[pId]--;
+            SharedResources.SafeSharedResourceOperation.ReleaseMutex();
         }
     }
 }

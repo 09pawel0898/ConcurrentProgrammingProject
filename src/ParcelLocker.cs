@@ -10,16 +10,34 @@ using System.Windows.Threading;
 
 namespace ParcelLockers
 {
+    enum ParcelType
+    {
+        TOBEPICKEDUP,
+        SENT
+    }
+    class Parcel
+    {
+        private ParcelType m_parcelType = new ParcelType();
+        private int m_parcelReceiverId;
+
+        public ParcelType Type { get { return m_parcelType; } set { m_parcelType = value; } }
+        public int ParcelReceiverId { get { return m_parcelReceiverId; } set { m_parcelReceiverId = value; } }
+    }
+
     class Cell
     {
         private static int IDGen = 0;
         private int m_Id;
         private Coord m_Pos = new Coord(0,0);
         private Canvas m_Context;
+        private Parcel m_Parcel;
+        public Parcel Parcel { get { return m_Parcel; } set { m_Parcel = value; } }
+        public bool IsTaken { get; set; }
         public Image Img { get; set; }
-
+        public int Id { get { return m_Id; } set { m_Id = value; } }
         public Cell(Canvas context, Coord coord, Coord parcelLockerOffset)
         {
+            m_Parcel = new Parcel();
             m_Context = context;
             m_Pos = coord;
             m_Id = IDGen;
@@ -39,11 +57,18 @@ namespace ParcelLockers
     }
     class ParcelLocker
     {
+        private static int IDGen = 0;
+        private int m_Id;
+        private bool m_IsFull = false;
         private Coord m_Offset;
         private Canvas m_Context;
         private List<Cell> m_Cells;
+        public int Id { get { return m_Id; } set { m_Id = value; } }
+
         public ParcelLocker(Coord offset,Canvas context)
         {
+            m_Id = IDGen;
+            IDGen++;
             m_Context = context;
             m_Offset = offset;
             m_Cells = new List<Cell>();
@@ -61,13 +86,42 @@ namespace ParcelLockers
                 }
             }
 
-            m_Cells[5].Img.Source = new BitmapImage(Resources.Instance.Cells[1]);
-            m_Cells[6].Img.Source = new BitmapImage(Resources.Instance.Cells[1]);
-            m_Cells[7].Img.Source = new BitmapImage(Resources.Instance.Cells[1]);
-            m_Cells[20].Img.Source = new BitmapImage(Resources.Instance.Cells[1]);
-            m_Cells[21].Img.Source = new BitmapImage(Resources.Instance.Cells[1]);
-            m_Cells[37].Img.Source = new BitmapImage(Resources.Instance.Cells[1]);
-            m_Cells[38].Img.Source = new BitmapImage(Resources.Instance.Cells[1]);
+            
+        }
+
+        public static int GetRandomParcelLockerId()
+        {
+            Random rand = new Random();
+            int result;
+            do
+            {
+                result = rand.Next(0, Defines.numParcelLockers);
+            } while (SharedResources.ParcelLockers[result].m_IsFull == true);
+            return result;
+        }
+
+        public void PutParcelToRandomCell()
+        {
+            Random rand = new Random();
+            int randomCellNum;
+
+            
+            do
+            { 
+                randomCellNum = rand.Next(0, m_Cells.Count);
+            } 
+            while (m_Cells[randomCellNum].IsTaken);
+
+            m_Cells[randomCellNum].IsTaken = true;
+            m_Cells[randomCellNum].Parcel.ParcelReceiverId = rand.Next(0, Defines.numPeopleInSimulation);
+            m_Cells[randomCellNum].Parcel.Type = ParcelType.SENT;
+
+            SharedResources.Screen.WaitOne();
+            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                m_Cells[randomCellNum].Img.Source = new BitmapImage(Resources.Instance.Cells[1]);
+            }));
+            SharedResources.Screen.ReleaseMutex();
         }
     }
 }

@@ -15,7 +15,7 @@
         <Image x:Name="p2" Source="/Resources/parcelLocker.png" Width="450" Canvas.Left="400" ></Image>
         <Image x:Name="p3" Source="/Resources/parcelLocker.png" Width="450" Canvas.Left="800" ></Image>
 
-        <Image x:Name="car" Source="/Resources/car.png" Width="450" Canvas.Left="10" Canvas.Top="576" ></Image>
+        <Image x:Name="car" Source="/Resources/car.png" Width="450" Canvas.Left="10" Canvas.Top="576" Panel.ZIndex="2147483646"></Image>
 
     </Canvas>
 </Window>

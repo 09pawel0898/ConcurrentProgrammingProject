@@ -11,7 +11,12 @@ namespace ParcelLockers
 {
     class SharedResources
     {
-        private static Window m_Window;
-        public static Window Window { get { return m_Window; } set { m_Window = value; } }
+        public static Window Window;
+        public static List<ParcelLocker> ParcelLockers = new List<ParcelLocker>();
+        public static Mutex Screen = new Mutex();
+        public static Mutex SafeSharedResourceOperation = new Mutex();
+        public static int[] NumPeopleInQueue = new int[Defines.numParcelLockers];
+        public static bool[,] PlacesTakenInQueue = new bool[Defines.numParcelLockers, Defines.maxPeopleInQueue];
+
     }
 }

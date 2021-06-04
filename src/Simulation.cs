@@ -13,11 +13,15 @@ namespace ParcelLockers
 {
     class Simulation
     {
-        Canvas m_Context;
-        List<ParcelLocker> m_ParcelLockers = new List<ParcelLocker>();
+        Canvas m_Context; 
         List<Person> m_People = new List<Person>();
         Thread m_Thread = null;
-        DispatcherTimer timer = null;
+        DispatcherTimer m_Timer = null;
+        int m_numPeopleInSimulation = 0;
+        bool m_EndOfProgram = false;
+
+        int m_iterCounter = 0;
+        int m_nextPersonAddIter = 0;
 
         public Simulation(Canvas context, Window window)
         {
@@ -30,23 +34,49 @@ namespace ParcelLockers
 
         private void Run()
         {
-
-            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
-            {
-                m_People.Add(new Person(m_Context));
-            }));
-
             
-            while(true)
+
+            while (!m_EndOfProgram)
             {
                 Thread.Sleep(2);
+                TryAddPeopleToSimulation();
                 UpdateLabels();
+                UpdatePeoplePositions();
             }
         }
 
-        private void InitSharedResources(Window window)
+        /*
+         * Update
+         */
+
+        private void UpdatePeoplePositions()
         {
-            SharedResources.Window = window;
+            foreach (Person person in m_People)
+            {
+                bool[,] tab = SharedResources.PlacesTakenInQueue;
+
+                if (person.WaitingInQueue && !person.CameToTheParcelLocker)
+                {
+                    if (person.PosInQueue == 0 && person.Position.y == Defines.parcelLockerPos[0].y)
+                    {
+                        person.CameToTheParcelLocker = true;
+                    }
+                    else if(person.PosInQueue == 0)
+                    {
+                        person.MovePerson(new Coord(0, -1));
+                    }
+                    else if (!person.CameToTheParcelLocker)
+                    {
+                        if(person.Position.y != Defines.parcelLockerPos[0].y + person.PosInQueue * 30)
+                            person.MovePerson(new Coord(0, -1));
+                        else if (SharedResources.PlacesTakenInQueue[person.QueueId, person.PosInQueue - 1] == false)
+                        {
+                            SharedResources.PlacesTakenInQueue[person.QueueId, person.PosInQueue--] = false;
+                            SharedResources.PlacesTakenInQueue[person.QueueId, person.PosInQueue] = true;
+                        }
+                    }
+                }
+            }
         }
 
         private void UpdateLabels()
@@ -54,10 +84,19 @@ namespace ParcelLockers
 
         }
 
+        /*
+         * Initialization 
+         */
+
+        private void InitSharedResources(Window window)
+        {
+            SharedResources.Window = window;
+        }
+
         private void InitSimulationThread()
         {
-            timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromMilliseconds(20);
+            m_Timer = new DispatcherTimer();
+            m_Timer.Interval = TimeSpan.FromMilliseconds(20);
             m_Thread = new Thread(Run);
             m_Thread.Start();
         }
@@ -71,13 +110,34 @@ namespace ParcelLockers
 
             Resources.AddUri(UriType.PERSON, new Uri("/Resources/matBack.png", UriKind.Relative));
             Resources.AddUri(UriType.PERSON, new Uri("/Resources/matBack2.png", UriKind.Relative));
+            Resources.AddUri(UriType.PERSON, new Uri("/Resources/patBack1.png", UriKind.Relative));
+            Resources.AddUri(UriType.PERSON, new Uri("/Resources/patLeft1.png", UriKind.Relative));
+            Resources.AddUri(UriType.PERSON, new Uri("/Resources/patRight1.png", UriKind.Relative));
         }
 
         private void InitParcelLockers()
         {
-            m_ParcelLockers.Add(new ParcelLocker(new Coord(0,0),m_Context));
-            m_ParcelLockers.Add(new ParcelLocker(new Coord(400,0),m_Context));
-            m_ParcelLockers.Add(new ParcelLocker(new Coord(800,0),m_Context));
+            List<ParcelLocker> parcelLockers = new List<ParcelLocker>();
+            parcelLockers.Add(new ParcelLocker(new Coord(0,0),m_Context));
+            parcelLockers.Add(new ParcelLocker(new Coord(400,0),m_Context));
+            parcelLockers.Add(new ParcelLocker(new Coord(800,0),m_Context));
+            SharedResources.ParcelLockers = parcelLockers;
+        }
+
+        private void TryAddPeopleToSimulation()
+        {
+            if(m_numPeopleInSimulation < Defines.numPeopleInSimulation)
+            {
+                Random rand = new Random();
+                if (m_nextPersonAddIter == m_iterCounter)
+                {  
+                    m_numPeopleInSimulation++;
+                    m_nextPersonAddIter = rand.Next(200, 600);
+                    m_iterCounter = 0;
+                    m_People.Add(new Person(m_Context)); 
+                }
+                else m_iterCounter++;
+            }
         }
     }
 }
