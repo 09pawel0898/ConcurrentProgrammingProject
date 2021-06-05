@@ -11,7 +11,8 @@ namespace ParcelLockers
         CELL,
         PARCELLOCKER,
         PERSON,
-        COURIER
+        COURIER,
+        COURIERCAR
     }
 
     class Resources
@@ -21,6 +22,7 @@ namespace ParcelLockers
         private static List<Uri>  peopleUris = new List<Uri>();
         private static List<Uri>  courierUris = new List<Uri>();
         private static List<Uri>  cellsUris = new List<Uri>();
+        private static List<Uri> courierCarUris = new List<Uri>();
         private Resources() {}
 
         public static Resources Instance
@@ -32,6 +34,7 @@ namespace ParcelLockers
         public List<Uri> People { get { return peopleUris; } }
         public List<Uri> Couriers { get { return courierUris; } }
         public List<Uri> Cells { get { return cellsUris; } }
+        public List<Uri> CourierCars { get { return courierCarUris; } }
 
         /* Uri description 
          * 
@@ -52,6 +55,9 @@ namespace ParcelLockers
                     break;
                 case UriType.COURIER:
                     courierUris.Add(uri);
+                    break;
+                case UriType.COURIERCAR:
+                    courierCarUris.Add(uri);
                     break;
             }
         }

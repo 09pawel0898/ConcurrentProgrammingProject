@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using System.Windows.Controls;
 using System.Threading;
-using System.Windows.Threading;
+using System.Collections.Generic;
 
 namespace ParcelLockers
 {
@@ -23,13 +19,14 @@ namespace ParcelLockers
         protected int m_queueId = 0;
         protected bool m_waitingInQueue = false;
         protected bool m_cameToTheParcelLocker = false;
-
+        protected List<Uri> m_imagesUris;
         public Coord Position { get { return m_currentPos; } set { m_currentPos = value; } }
         public Image Img { get; set; }
         public int PosInQueue { get { return m_posInQueue; } set { m_posInQueue = value; } }
         public int QueueId { get { return m_queueId; } set { m_queueId = value; } }
         public bool WaitingInQueue { get { return m_waitingInQueue; } set { m_waitingInQueue = value; } }
         public bool CameToTheParcelLocker { get { return m_cameToTheParcelLocker; } set { m_cameToTheParcelLocker = value; } }
+        public Thread Thread { get { return m_Thread; } }
 
         protected Human()
         {
@@ -41,7 +38,7 @@ namespace ParcelLockers
             SharedResources.Screen.WaitOne();
             SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
             {
-                Img.Source = new BitmapImage(Resources.Instance.People[4]);
+                Img.Source = new BitmapImage(m_imagesUris[2]);
             }));
             SharedResources.Screen.ReleaseMutex();
 
@@ -52,23 +49,13 @@ namespace ParcelLockers
                 SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     if (i == 0)
-                        Img.Source = new BitmapImage(Resources.Instance.People[4]);
+                        Img.Source = new BitmapImage(m_imagesUris[2]);
                     Canvas.SetLeft(Img, Canvas.GetLeft(Img) + 1);
                     m_currentPos.x++;
                     Img.Opacity -= 0.05;
                 }));
                 SharedResources.Screen.ReleaseMutex();
             }
-
-            SharedResources.Screen.WaitOne();
-            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
-            {
-                Canvas.SetLeft(Img, Defines.sidewalkSpawnPos.x);
-                Canvas.SetTop(Img, Defines.sidewalkSpawnPos.y);
-                m_currentPos = new Coord(Defines.sidewalkSpawnPos.x, Defines.sidewalkSpawnPos.y);
-                Img.Opacity = 1;
-            }));
-            SharedResources.Screen.ReleaseMutex();
         }
 
         /*
@@ -87,7 +74,7 @@ namespace ParcelLockers
                 }
                 else if (vec.x < 0 && vec.y == 0) // left
                 {
-                    Canvas.SetLeft(Img, Canvas.GetLeft(Img) - vec.x);
+                    Canvas.SetLeft(Img, Canvas.GetLeft(Img) + vec.x);
                     m_currentPos.x--;
                 }
                 else if (vec.x == 0 && vec.y > 0) // down
@@ -104,5 +91,36 @@ namespace ParcelLockers
             }));
             SharedResources.Screen.ReleaseMutex();
         }
+
+        protected void EnterTheQueue(int pId)
+        {
+            SharedResources.SafeSharedResourceOperation.WaitOne();
+
+            m_posInQueue = SharedResources.NumPeopleInQueue[pId];
+
+            SharedResources.PlacesTakenInQueue[pId, SharedResources.NumPeopleInQueue[pId]] = true;
+            SharedResources.NumPeopleInQueue[pId]++;
+            SharedResources.SafeSharedResourceOperation.ReleaseMutex();
+
+            SharedResources.Screen.WaitOne();
+            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                Img.Source = new BitmapImage(m_imagesUris[0]);
+                Canvas.SetZIndex(Img, ZIndexGen++);
+            }));
+            m_waitingInQueue = true;
+            SharedResources.Screen.ReleaseMutex();
+        }
+
+        protected void LeaveTheQueue(int pId)
+        {
+            SharedResources.SafeSharedResourceOperation.WaitOne();
+            m_waitingInQueue = false;
+            m_cameToTheParcelLocker = false;
+            SharedResources.PlacesTakenInQueue[pId, 0] = false;
+            SharedResources.NumPeopleInQueue[pId]--;
+            SharedResources.SafeSharedResourceOperation.ReleaseMutex();
+        }
+
     }
 }

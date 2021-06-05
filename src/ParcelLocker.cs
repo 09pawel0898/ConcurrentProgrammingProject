@@ -63,8 +63,10 @@ namespace ParcelLockers
         private Coord m_Offset;
         private Canvas m_Context;
         private List<Cell> m_Cells;
-        public int Id { get { return m_Id; } set { m_Id = value; } }
+        private int m_NumParcels;
 
+        public int Id { get { return m_Id; } set { m_Id = value; } }
+        public int NumParcels { get { return m_NumParcels; } }
         public ParcelLocker(Coord offset,Canvas context)
         {
             m_Id = IDGen;
@@ -115,6 +117,7 @@ namespace ParcelLockers
             m_Cells[randomCellNum].IsTaken = true;
             m_Cells[randomCellNum].Parcel.ParcelReceiverId = rand.Next(0, Defines.numPeopleInSimulation);
             m_Cells[randomCellNum].Parcel.Type = ParcelType.SENT;
+            m_NumParcels++;
 
             SharedResources.Screen.WaitOne();
             SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>

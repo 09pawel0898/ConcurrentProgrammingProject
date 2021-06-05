@@ -22,8 +22,9 @@ namespace ParcelLockers
         {
             m_Animator = new Animator(2, Resources.Instance.People);
             m_Context = context;
+            m_imagesUris = Resources.Instance.People;
 
-            SharedResources.SafeSharedResourceOperation.WaitOne();
+            SharedResources.Screen.WaitOne();
             SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
             {
                 Img = new Image
@@ -31,13 +32,13 @@ namespace ParcelLockers
                     Width = 80,
                     Height = 200,
                     Name = "P"+m_Id,
-                    Source = new BitmapImage(Resources.Instance.People[4])
+                    Source = new BitmapImage(m_imagesUris[2])
                 };
                 m_Context.Children.Add(Img);
                 Canvas.SetLeft(Img, Defines.sidewalkSpawnPos.x);
                 Canvas.SetTop(Img, Defines.sidewalkSpawnPos.y);
             }));
-            SharedResources.SafeSharedResourceOperation.ReleaseMutex();
+            SharedResources.Screen.ReleaseMutex();
 
             m_currentPos = new Coord(Defines.sidewalkSpawnPos.x, Defines.sidewalkSpawnPos.y);
             m_Thread = new Thread(Simulate);
@@ -62,6 +63,7 @@ namespace ParcelLockers
                     case PersonAction.PICKINGUP:    SimulatePickingUpParcel();  break;
                 }
                 FadeOut();
+                ResetPosition();
                 // Sleep for some time
                 Thread.Sleep(rand.Next(1000, 4000));
             }
@@ -72,7 +74,7 @@ namespace ParcelLockers
             //int parcelLockerId = 0;
             m_queueId = parcelLockerId;
             GoToProperParcelLockerPath(parcelLockerId);
-            TryToQueueUpAndPickUpTheParcel(parcelLockerId);
+            TryToQueueUpAndGetToTheParcelLocker(parcelLockerId);
         }
 
         private void SimulatePickingUpParcel()
@@ -89,42 +91,42 @@ namespace ParcelLockers
             }
         }
 
-        private void TryToQueueUpAndPickUpTheParcel(int pId)
+        private void TryToQueueUpAndGetToTheParcelLocker(int pId)
         {
-            m_waitingInQueue = true;
-            SharedResources.SafeSharedResourceOperation.WaitOne();
-            m_posInQueue = SharedResources.NumPeopleInQueue[pId];
-            
-            SharedResources.PlacesTakenInQueue[pId,SharedResources.NumPeopleInQueue[pId]] = true;
-            SharedResources.NumPeopleInQueue[pId]++;
-            SharedResources.SafeSharedResourceOperation.ReleaseMutex();
+            EnterTheQueue(pId);
 
-            SharedResources.Screen.WaitOne();
-            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
-            {
-                Img.Source = new BitmapImage(Resources.Instance.People[2]);
-                Canvas.SetZIndex(Img, ZIndexGen++);
-            }));
-            SharedResources.Screen.ReleaseMutex();
-
-            
             Monitor.Enter(SharedResources.ParcelLockers[pId]);
             try
             {
                 // waiting to get to the first position
-                while(!m_cameToTheParcelLocker) { }
+                try
+                {
+                    Thread.Sleep(Timeout.Infinite);
+                }
+                catch (ThreadInterruptedException e) { }
+
                 // taking selected actions on a shared resource
                 Thread.Sleep(4000);
                 SharedResources.ParcelLockers[pId].PutParcelToRandomCell();
             }
-            finally { Monitor.Exit(SharedResources.ParcelLockers[pId]); }
+            finally
+            {
+                Monitor.Exit(SharedResources.ParcelLockers[pId]);
+            }
+            LeaveTheQueue(pId);
+        }
 
-            m_waitingInQueue = false;
-            m_cameToTheParcelLocker = false;
-            SharedResources.SafeSharedResourceOperation.WaitOne();
-            SharedResources.PlacesTakenInQueue[pId, 0] = false;
-            SharedResources.NumPeopleInQueue[pId]--;
-            SharedResources.SafeSharedResourceOperation.ReleaseMutex();
+        private void ResetPosition()
+        {
+            SharedResources.Screen.WaitOne();
+            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                Canvas.SetLeft(Img, Defines.sidewalkSpawnPos.x);
+                Canvas.SetTop(Img, Defines.sidewalkSpawnPos.y);
+                m_currentPos = new Coord(Defines.sidewalkSpawnPos.x, Defines.sidewalkSpawnPos.y);
+                Img.Opacity = 1;
+            }));
+            SharedResources.Screen.ReleaseMutex();
         }
     }
 }

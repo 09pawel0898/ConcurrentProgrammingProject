@@ -38,5 +38,20 @@ namespace ParcelLockers
             new Coord(590, 80), 
             new Coord(990, 80)
         };
+
+        public static readonly Coord[] courierSpawnPos = new Coord[]
+        {
+            new Coord(310, 460),
+            new Coord(710, 460),
+            new Coord(1100, 460)
+        };
+
+        public static readonly Coord[] courierCarPos = new Coord[]
+        {
+            new Coord(10, 576),
+            new Coord(400, 576),
+            new Coord(790, 576)
+        };
+
     }
 }
