@@ -17,6 +17,6 @@ namespace ParcelLockers
         public static Mutex SafeSharedResourceOperation = new Mutex();
         public static int[] NumPeopleInQueue = new int[Defines.numParcelLockers];
         public static bool[,] PlacesTakenInQueue = new bool[Defines.numParcelLockers, Defines.maxPeopleInQueue];
-        public static List<Parcel>[] ParcelsShippedToPeople = new List<Parcel>[Defines.numPeopleInSimulation];
+        public static List<Parcel>[] ParcelsShippedToPeople;
     }
 }

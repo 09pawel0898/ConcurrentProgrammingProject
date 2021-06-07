@@ -13,12 +13,10 @@ namespace ParcelLockers
 {
     public class Simulation
     {
-        Window m_Window = null;
         Canvas m_Context = null; 
         List<Human> m_People = new List<Human>();
         Thread m_Thread = null;
-        DispatcherTimer m_Timer = null;
-        int m_numPeopleInSimulation = 0;
+        int m_currentNumPeopleInSimulation = 0;
         bool m_EndOfProgram = false;
 
         int m_iterCounter = 0;
@@ -27,9 +25,9 @@ namespace ParcelLockers
         public Thread Thread { get { return m_Thread; } }
         public Simulation(Canvas context, Window window)
         {
+            SharedResources.Window = window;
             m_Context = context;
-            m_Window = window;
-            InitSharedResources();
+
             InitResources();
             InitParcelLockers();
             InitSimulationThread();
@@ -38,7 +36,9 @@ namespace ParcelLockers
         private void Run()
         {
             Config();
+            InitSharedResources();
             InitCourier();
+
             while (!m_EndOfProgram)
             {
                 Thread.Sleep(2);
@@ -53,7 +53,7 @@ namespace ParcelLockers
             SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
             {
                 ConfigWindow configWindow = new ConfigWindow();
-                configWindow.Owner = m_Window;
+                configWindow.Owner = SharedResources.Window;
                 configWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 configWindow.Show();
                 
@@ -124,15 +124,13 @@ namespace ParcelLockers
         }
         private void InitSharedResources()
         {
-            SharedResources.Window = m_Window;
-            for(int i = 0; i < Defines.numPeopleInSimulation; i++)
+            SharedResources.ParcelsShippedToPeople = new List<Parcel>[Defines.numPeopleInSimulation];
+            for (int i = 0; i < Defines.numPeopleInSimulation; i++)
                 SharedResources.ParcelsShippedToPeople[i] = new List<Parcel>();
         }
 
         private void InitSimulationThread()
         {
-            m_Timer = new DispatcherTimer();
-            m_Timer.Interval = TimeSpan.FromMilliseconds(20);
             m_Thread = new Thread(Run);
             m_Thread.Start();
         }
@@ -168,12 +166,12 @@ namespace ParcelLockers
 
         private void TryAddPeopleToSimulation()
         {
-            if(m_numPeopleInSimulation < Defines.numPeopleInSimulation)
+            if(m_currentNumPeopleInSimulation < Defines.numPeopleInSimulation)
             {
                 Random rand = new Random();
                 if (m_nextPersonAddIter == m_iterCounter)
                 {  
-                    m_numPeopleInSimulation++;
+                    m_currentNumPeopleInSimulation++;
                     m_nextPersonAddIter = rand.Next(200, 600);
                     m_iterCounter = 0;
                     m_People.Add(new Person(m_Context)); 

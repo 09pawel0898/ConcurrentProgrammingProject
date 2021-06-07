@@ -19,7 +19,8 @@ namespace ParcelLockers
 
     class Defines
     {
-        public static readonly int numPeopleInSimulation = 10;
+        public static int numPeopleInSimulation = 7;
+        public static int simulationSpeed = 5;
         public static readonly int numCellsInRow = 7;
         public static readonly int numCellsInColumn = 6;
         public static readonly int cellWidth = 50;
