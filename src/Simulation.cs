@@ -11,11 +11,11 @@ using System.Windows;
 
 namespace ParcelLockers
 {
-    class Simulation
+    public class Simulation
     {
+        Window m_Window = null;
         Canvas m_Context = null; 
         List<Human> m_People = new List<Human>();
-        Courier m_Courier = null;
         Thread m_Thread = null;
         DispatcherTimer m_Timer = null;
         int m_numPeopleInSimulation = 0;
@@ -24,10 +24,12 @@ namespace ParcelLockers
         int m_iterCounter = 0;
         int m_nextPersonAddIter = 0;
 
+        public Thread Thread { get { return m_Thread; } }
         public Simulation(Canvas context, Window window)
         {
             m_Context = context;
-            InitSharedResources(window);
+            m_Window = window;
+            InitSharedResources();
             InitResources();
             InitParcelLockers();
             InitSimulationThread();
@@ -35,7 +37,7 @@ namespace ParcelLockers
 
         private void Run()
         {
-
+            Config();
             InitCourier();
             while (!m_EndOfProgram)
             {
@@ -46,6 +48,25 @@ namespace ParcelLockers
             }
         }
 
+        private void Config()
+        {
+            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                ConfigWindow configWindow = new ConfigWindow();
+                configWindow.Owner = m_Window;
+                configWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                configWindow.Show();
+                
+            }));
+
+            // Sleep until the config is over
+            try
+            {
+                Thread.Sleep(Timeout.Infinite);
+            }
+            catch (ThreadInterruptedException e) { }
+            //m_Window.Show();
+        }
         /*
          * Update
          */
@@ -101,9 +122,9 @@ namespace ParcelLockers
         {
             m_People.Add(new Courier(m_Context));
         }
-        private void InitSharedResources(Window window)
+        private void InitSharedResources()
         {
-            SharedResources.Window = window;
+            SharedResources.Window = m_Window;
             for(int i = 0; i < Defines.numPeopleInSimulation; i++)
                 SharedResources.ParcelsShippedToPeople[i] = new List<Parcel>();
         }

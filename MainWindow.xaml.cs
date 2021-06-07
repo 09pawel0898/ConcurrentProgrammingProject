@@ -18,16 +18,18 @@ namespace ParcelLockers
 
     public partial class MainWindow : Window
     {
-        Simulation m_Simulation;
+        public static Simulation simulation;
         public MainWindow()
         {
             InitializeComponent();
-            m_Simulation = new Simulation(MainCanvas,this);
+            //this.Hide();
+            simulation = new Simulation(MainCanvas,this);
         }
 
         private void ProgramExit(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Environment.Exit(0);
         }
+       
     }
 }

@@ -12,8 +12,8 @@ namespace ParcelLockers
 {
     class Animator
     {
-        private static int DT;
-        private int m_elapsedTime;
+        //private static int DT;
+        //private int m_elapsedTime;
         private int m_currentFrameId = 0;
         private int m_numFrames;
         private List<Uri> m_imageSources;

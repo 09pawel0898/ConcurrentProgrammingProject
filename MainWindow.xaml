@@ -5,8 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ParcelLockers"
         mc:Ignorable="d"
-        Title="MainWindow" Height="800" Width="1275"
-        Closing="ProgramExit">
+        Title="ParcelLockers" Height="800" Width="1275"
+        Closing="ProgramExit"
+        ResizeMode="NoResize"
+        >
     <Canvas x:Name="MainCanvas">
 
         <Image x:Name="background" Source="/Resources/background.png" ></Image>
