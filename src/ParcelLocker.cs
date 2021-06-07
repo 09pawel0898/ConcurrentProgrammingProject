@@ -19,9 +19,11 @@ namespace ParcelLockers
     {
         private ParcelType m_parcelType = new ParcelType();
         private int m_parcelReceiverId;
+        private int m_destinationParcelLocker;
 
         public ParcelType Type { get { return m_parcelType; } set { m_parcelType = value; } }
         public int ParcelReceiverId { get { return m_parcelReceiverId; } set { m_parcelReceiverId = value; } }
+        public int DestinationParcelLocker { get { return m_destinationParcelLocker; } set { m_destinationParcelLocker = value; } }
     }
 
     class Cell
@@ -115,6 +117,7 @@ namespace ParcelLockers
             while (m_Cells[randomCellNum].IsTaken);
 
             m_Cells[randomCellNum].IsTaken = true;
+            m_Cells[randomCellNum].Parcel.DestinationParcelLocker = rand.Next(0, Defines.numParcelLockers);
             m_Cells[randomCellNum].Parcel.ParcelReceiverId = rand.Next(0, Defines.numPeopleInSimulation);
             m_Cells[randomCellNum].Parcel.Type = ParcelType.SENT;
             m_NumParcels++;
@@ -125,6 +128,74 @@ namespace ParcelLockers
                 m_Cells[randomCellNum].Img.Source = new BitmapImage(Resources.Instance.Cells[1]);
             }));
             SharedResources.Screen.ReleaseMutex();
+        }
+
+        public List<Parcel> GetAllShippedParcels()
+        {
+            List<Parcel> parcelList = new List<Parcel>();
+
+            foreach (Cell cell in m_Cells)
+            {
+                if(cell.IsTaken)
+                {
+                    cell.Parcel.Type = ParcelType.TOBEPICKEDUP;
+                    parcelList.Add(cell.Parcel);
+                    cell.IsTaken = false;
+                    m_NumParcels--;
+                    SharedResources.Screen.WaitOne();
+                    SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        cell.Img.Source = new BitmapImage(Resources.Instance.Cells[0]);
+                    }));
+                    SharedResources.Screen.ReleaseMutex();
+
+                }
+            }
+            return parcelList;
+        }
+
+        public void PutShippedParcelToTheParcelLocker(Parcel shippedParcel)
+        {
+            Random rand = new Random();
+            int randomCellNum;
+
+            do
+            {
+                randomCellNum = rand.Next(0, m_Cells.Count);
+            }
+            while (m_Cells[randomCellNum].IsTaken);
+
+            m_Cells[randomCellNum].IsTaken = true;
+            m_Cells[randomCellNum].Parcel = shippedParcel;
+            m_NumParcels++;
+
+            SharedResources.Screen.WaitOne();
+            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                m_Cells[randomCellNum].Img.Source = new BitmapImage(Resources.Instance.Cells[2]);
+            }));
+            SharedResources.Screen.ReleaseMutex();
+
+            // add the package to the list of packages sent to this addressee
+            SharedResources.ParcelsShippedToPeople[shippedParcel.ParcelReceiverId].Add(shippedParcel);
+        }
+
+        public void TakeMyParcel(Parcel parcelToTake)
+        {
+            foreach (Cell cell in m_Cells)
+            {
+                if (cell.Parcel == parcelToTake)
+                {
+                    cell.IsTaken = false;
+                    m_NumParcels--;
+                    SharedResources.Screen.WaitOne();
+                    SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        cell.Img.Source = new BitmapImage(Resources.Instance.Cells[0]);
+                    }));
+                    SharedResources.Screen.ReleaseMutex();
+                }
+            }
         }
     }
 }

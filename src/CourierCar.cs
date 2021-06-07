@@ -37,24 +37,47 @@ namespace ParcelLockers
 
         public void DriveToTheParcelLocker(int pId)
         {
+
+            if (Defines.parcelLockerPos[pId].x > m_Position.x)
+            {
+                while (m_Position.x != Defines.courierCarPos[pId].x)
+                {
+                    Thread.Sleep(2);
+                    MoveRight();
+                }
+            }
+            else
+            {
+                while (m_Position.x != Defines.courierCarPos[Defines.numParcelLockers - 1].x + 400)
+                {
+                    Thread.Sleep(2);
+                    MoveRight();
+                }
+
+                SharedResources.Screen.WaitOne();
+                SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    Canvas.SetLeft(Img, Defines.courierCarPos[0].x -400);
+                    m_Position.x = Defines.courierCarPos[0].x - 400;
+                }));
+                SharedResources.Screen.ReleaseMutex();
+
+                while (m_Position.x != Defines.courierCarPos[pId].x)
+                {
+                    Thread.Sleep(2);
+                    MoveRight();
+                }
+            }
+        }
+
+        private void MoveRight()
+        {
             SharedResources.Screen.WaitOne();
             SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
             {
-                if (pId < Defines.numParcelLockers)
-                { 
-                    while (m_Position.x != Defines.parcelLockerPos[pId].x)
-                    {
-                        Thread.Sleep(2);
-                        Canvas.SetLeft(Img, Canvas.GetLeft(Img) + 1);
-                        m_Position.x++;
-                    }
-                }
-                else
-                {
-
-                }
+                Canvas.SetLeft(Img, Canvas.GetLeft(Img) + 1);
+                m_Position.x++;
             }));
-        
             SharedResources.Screen.ReleaseMutex();
         }
     }

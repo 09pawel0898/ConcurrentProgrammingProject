@@ -18,8 +18,14 @@ namespace ParcelLockers
 
     class Person : Human
     {
+        PersonAction m_currentAction;
+        private static int IDGen = 0;
+        protected int m_Id;
+
         public Person(Canvas context)
         {
+            m_Id = IDGen++;
+
             m_Animator = new Animator(2, Resources.Instance.People);
             m_Context = context;
             m_imagesUris = Resources.Instance.People;
@@ -48,16 +54,19 @@ namespace ParcelLockers
         private void Simulate()
         {
             Random rand = new Random();
-            PersonAction action;
 
             while (true)
             {
                 // Decide what to do in the current loop
-                int randomNum = rand.Next(0, 100);
-                action = (randomNum < 100) ?  PersonAction.SENDING : PersonAction.PICKINGUP;
+                if (SharedResources.ParcelsShippedToPeople[m_Id].Count > 0)
+                    m_currentAction = PersonAction.PICKINGUP;
+                else
+                    m_currentAction = PersonAction.SENDING; 
+                
+                //: PersonAction.PICKINGUP;
 
                 // two action types (sending or picking up a parcel)
-                switch (action)
+                switch (m_currentAction)
                 {
                     case PersonAction.SENDING:      SimulateSendingParcel();    break;
                     case PersonAction.PICKINGUP:    SimulatePickingUpParcel();  break;
@@ -79,7 +88,11 @@ namespace ParcelLockers
 
         private void SimulatePickingUpParcel()
         {
-
+            int parcelLockerId = SharedResources.ParcelsShippedToPeople[m_Id].First().DestinationParcelLocker;
+            //int parcelLockerId = 0;
+            m_queueId = parcelLockerId;
+            GoToProperParcelLockerPath(parcelLockerId);
+            TryToQueueUpAndGetToTheParcelLocker(parcelLockerId);
         }
 
         private void GoToProperParcelLockerPath(int pId)
@@ -107,7 +120,17 @@ namespace ParcelLockers
 
                 // taking selected actions on a shared resource
                 Thread.Sleep(4000);
-                SharedResources.ParcelLockers[pId].PutParcelToRandomCell();
+                switch (m_currentAction)
+                {
+                    case PersonAction.SENDING:
+                        SharedResources.ParcelLockers[pId].PutParcelToRandomCell();
+                        break;
+                    case PersonAction.PICKINGUP:
+                        Parcel parcelToTake = SharedResources.ParcelsShippedToPeople[m_Id].First();
+                        SharedResources.ParcelLockers[pId].TakeMyParcel(parcelToTake);
+                        SharedResources.ParcelsShippedToPeople[m_Id].Remove(parcelToTake);
+                        break;
+                }
             }
             finally
             {

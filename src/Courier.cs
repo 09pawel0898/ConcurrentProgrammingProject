@@ -10,16 +10,27 @@ using System.Windows.Threading;
 
 namespace ParcelLockers
 {
+    enum CourierAction
+    {
+        TAKE,
+        BRING
+    }
+
     class Courier : Human
     {
         private CourierCar m_courierCar;
         private int m_currentParcelLocker;
+        private List<Parcel>[] m_shippedParcelsToParcelLocker;
+        private CourierAction m_currentAction;
 
         public Courier(Canvas context)
         {
             //m_Animator = new Animator(2, Resources.Instance.People);
             m_Context = context;
             m_imagesUris = Resources.Instance.Couriers;
+            m_shippedParcelsToParcelLocker = new List<Parcel>[Defines.numParcelLockers];
+            for (int i = 0; i < Defines.numParcelLockers; i++)
+                m_shippedParcelsToParcelLocker[i] = new List<Parcel>();
 
             SharedResources.SafeSharedResourceOperation.WaitOne();
             SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
@@ -29,7 +40,7 @@ namespace ParcelLockers
                 {
                     Width = 80,
                     Height = 200,
-                    Name = "P" + m_Id,
+                    Name = "Courier",
                     Source = new BitmapImage(Resources.Instance.Couriers[1])
                 };
                 SetCourierOpacity(0);
@@ -47,7 +58,6 @@ namespace ParcelLockers
         private void Simulate()
         {
             Random rand = new Random();
-            bool firstIter = true;
             int parcelLockerId = 0;
 
             //Init simulation waiting time
@@ -56,51 +66,67 @@ namespace ParcelLockers
             while (true)
             {
                 m_currentParcelLocker = parcelLockerId;
+                ResetPosition();
+
                 Thread.Sleep(rand.Next(1000, 2000));
+
                 while(SharedResources.ParcelLockers[m_currentParcelLocker].NumParcels < 1)
                 {
                     Thread.Sleep(2);
                 }
 
-                SetCourierOpacity(1);
-
-                SimulatePickingUpParcels();
-                FadeOut();
-                ResetPosition();
+                PickUpParcels();
 
                 Thread.Sleep(rand.Next(1000, 4000));
 
-                if (!firstIter)
-                {
-                    SimulateBringingNewParcels();
-                    FadeOut();
-                    ResetPosition();
-                }
-                else
-                {
-                    
-                    firstIter = false;
-                }
+
+                if (m_shippedParcelsToParcelLocker[m_currentParcelLocker].Count > 0)
+                    BringShippedParcels();
+
                 parcelLockerId++;
                 if (parcelLockerId == Defines.numParcelLockers)
                     parcelLockerId = 0;
 
                 //drive to the next parcel locker
-
+                m_courierCar.DriveToTheParcelLocker(parcelLockerId);
             }
         }
 
+        private void PickUpParcels()
+        {
+            SetCourierOpacity(1);
+            SimulatePickingUpParcels();
+            FadeOut();
+            ResetPosition();
+            SetCourierOpacity(0);
+        }
+
+        private void BringShippedParcels()
+        {
+            SetCourierOpacity(1);
+            SimulateBringingShippedParcels();
+            //SimulatePickingUpParcels();
+            FadeOut();
+            ResetPosition();
+            SetCourierOpacity(0);
+        }
 
         private void SimulatePickingUpParcels()
         {
             m_queueId = m_currentParcelLocker;
+            m_currentAction = CourierAction.TAKE;
             GoToProperParcelLockerPath();
             TryToQueueUpAndGetToTheParcelLocker();
         }
-        private void SimulateBringingNewParcels()
-        {
 
+        private void SimulateBringingShippedParcels()
+        {
+            m_queueId = m_currentParcelLocker;
+            m_currentAction = CourierAction.BRING;
+            GoToProperParcelLockerPath();
+            TryToQueueUpAndGetToTheParcelLocker();
         }
+
         private void GoToProperParcelLockerPath()
         {
             while (m_currentPos.x != Defines.parcelLockerPos[m_currentParcelLocker].x)
@@ -125,6 +151,16 @@ namespace ParcelLockers
 
                 // taking selected actions on a shared resource
                 Thread.Sleep(4000);
+                switch(m_currentAction)
+                {
+                    case CourierAction.TAKE:
+                        TakeShippedParcels();
+                        break;
+                    case CourierAction.BRING:
+                        PutParcelsShippedToThisParcelLocker();
+                        break;
+                }
+                
             }
             finally
             {
@@ -142,7 +178,6 @@ namespace ParcelLockers
                 Canvas.SetLeft(Img, Defines.courierSpawnPos[m_currentParcelLocker].x);
                 Canvas.SetTop(Img, Defines.courierSpawnPos[m_currentParcelLocker].y);
                 m_currentPos = new Coord(Defines.courierSpawnPos[m_currentParcelLocker].x, Defines.courierSpawnPos[m_currentParcelLocker].y);
-                SetCourierOpacity(1);
             }));
             SharedResources.Screen.ReleaseMutex();
         }
@@ -155,6 +190,25 @@ namespace ParcelLockers
                 Img.Opacity = value;
             }));
             SharedResources.Screen.ReleaseMutex();
+        }
+
+        private void TakeShippedParcels()
+        {
+            List<Parcel> takenParcels = SharedResources.ParcelLockers[m_currentParcelLocker].GetAllShippedParcels();
+            foreach(Parcel parcel in takenParcels)
+            {
+                int pId = parcel.DestinationParcelLocker;
+                m_shippedParcelsToParcelLocker[pId].Add(parcel);
+            }
+        }
+
+        private void PutParcelsShippedToThisParcelLocker()
+        {
+            foreach(Parcel parcel in m_shippedParcelsToParcelLocker[m_currentParcelLocker])
+            {
+                SharedResources.ParcelLockers[m_currentParcelLocker].PutShippedParcelToTheParcelLocker(parcel);
+            }
+            m_shippedParcelsToParcelLocker[m_currentParcelLocker].Clear();
         }
     }
 }

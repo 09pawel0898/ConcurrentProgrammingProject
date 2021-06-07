@@ -8,12 +8,11 @@ namespace ParcelLockers
 {
     class Human
     {
-        protected static int IDGen = 0;
+        
         protected static int ZIndexGen = 0;
         protected Thread m_Thread;
         protected Canvas m_Context;
         protected Animator m_Animator;
-        protected int m_Id;
         protected Coord m_currentPos;
         protected int m_posInQueue = 0;
         protected int m_queueId = 0;
@@ -30,7 +29,7 @@ namespace ParcelLockers
 
         protected Human()
         {
-            m_Id = IDGen++;
+            
         }
         protected void FadeOut()
         {
@@ -100,7 +99,7 @@ namespace ParcelLockers
 
             SharedResources.PlacesTakenInQueue[pId, SharedResources.NumPeopleInQueue[pId]] = true;
             SharedResources.NumPeopleInQueue[pId]++;
-            SharedResources.SafeSharedResourceOperation.ReleaseMutex();
+            
 
             SharedResources.Screen.WaitOne();
             SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
@@ -110,6 +109,7 @@ namespace ParcelLockers
             }));
             m_waitingInQueue = true;
             SharedResources.Screen.ReleaseMutex();
+            SharedResources.SafeSharedResourceOperation.ReleaseMutex();
         }
 
         protected void LeaveTheQueue(int pId)

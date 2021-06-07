@@ -104,6 +104,8 @@ namespace ParcelLockers
         private void InitSharedResources(Window window)
         {
             SharedResources.Window = window;
+            for(int i = 0; i < Defines.numPeopleInSimulation; i++)
+                SharedResources.ParcelsShippedToPeople[i] = new List<Parcel>();
         }
 
         private void InitSimulationThread()
@@ -120,6 +122,7 @@ namespace ParcelLockers
 
             Resources.AddUri(UriType.CELL, new Uri("/Resources/cellfree.png", UriKind.Relative));
             Resources.AddUri(UriType.CELL, new Uri("/Resources/celltaken.png", UriKind.Relative));
+            Resources.AddUri(UriType.CELL, new Uri("/Resources/cellcollect.png", UriKind.Relative));
 
             Resources.AddUri(UriType.PERSON, new Uri("/Resources/patBack1.png", UriKind.Relative));
             Resources.AddUri(UriType.PERSON, new Uri("/Resources/patLeft1.png", UriKind.Relative));
