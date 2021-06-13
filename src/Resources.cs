@@ -19,7 +19,7 @@ namespace ParcelLockers
     {
         private static Resources instance = new Resources();
         private static List<Uri>  parcelLockerUris = new List<Uri>();
-        private static List<Uri>  peopleUris = new List<Uri>();
+        private static List<Uri>[]  peopleUris = new List<Uri>[4];
         private static List<Uri>  courierUris = new List<Uri>();
         private static List<Uri>  cellsUris = new List<Uri>();
         private static List<Uri> courierCarUris = new List<Uri>();
@@ -31,7 +31,7 @@ namespace ParcelLockers
         }
 
         public List<Uri> ParcelLockers { get { return parcelLockerUris; } }
-        public List<Uri> People { get { return peopleUris; } }
+        public List<Uri>[] People { get { return peopleUris; } }
         public List<Uri> Couriers { get { return courierUris; } }
         public List<Uri> Cells { get { return cellsUris; } }
         public List<Uri> CourierCars { get { return courierCarUris; } }
@@ -40,7 +40,7 @@ namespace ParcelLockers
          * 
          * 
          */
-        public static void AddUri(UriType uriType, Uri uri)
+        public static void AddUri(UriType uriType, Uri uri, int personId)
         {
             switch(uriType)
             {
@@ -51,7 +51,9 @@ namespace ParcelLockers
                     parcelLockerUris.Add(uri);
                     break;
                 case UriType.PERSON:
-                    peopleUris.Add(uri);
+                    if (peopleUris[personId] == null)
+                        peopleUris[personId] = new List<Uri>();
+                    peopleUris[personId].Add(uri);
                     break;
                 case UriType.COURIER:
                     courierUris.Add(uri);

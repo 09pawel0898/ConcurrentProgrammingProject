@@ -19,8 +19,10 @@ namespace ParcelLockers
 
     class Defines
     {
+        // configurable
         public static int numPeopleInSimulation = 7;
         public static int simulationSpeed = 5;
+
         public static readonly int numCellsInRow = 7;
         public static readonly int numCellsInColumn = 6;
         public static readonly int cellWidth = 50;
@@ -31,7 +33,7 @@ namespace ParcelLockers
         public static readonly int maxCouriers = 3;
 
         public static readonly int sidewalkY = 460;
-        public static readonly Coord sidewalkSpawnPos = new Coord(0, 460);
+        public static readonly Coord sidewalkSpawnPos = new Coord(-100, 460);
 
         public static readonly Coord[] parcelLockerPos = new Coord[] 
         {

@@ -65,10 +65,11 @@ namespace ParcelLockers
         private Coord m_Offset;
         private Canvas m_Context;
         private List<Cell> m_Cells;
-        private int m_NumParcels;
+        private int m_numShippedParcels;
+        private int m_numParcelsToPickUp;
 
         public int Id { get { return m_Id; } set { m_Id = value; } }
-        public int NumParcels { get { return m_NumParcels; } }
+        public int NumShippedParcels { get { return m_numShippedParcels; } }
         public ParcelLocker(Coord offset,Canvas context)
         {
             m_Id = IDGen;
@@ -89,8 +90,6 @@ namespace ParcelLockers
                         m_Cells.Add(new Cell(m_Context,new Coord(i,j),m_Offset));
                 }
             }
-
-            
         }
 
         public static int GetRandomParcelLockerId()
@@ -120,7 +119,7 @@ namespace ParcelLockers
             m_Cells[randomCellNum].Parcel.DestinationParcelLocker = rand.Next(0, Defines.numParcelLockers);
             m_Cells[randomCellNum].Parcel.ParcelReceiverId = rand.Next(0, Defines.numPeopleInSimulation);
             m_Cells[randomCellNum].Parcel.Type = ParcelType.SENT;
-            m_NumParcels++;
+            m_numShippedParcels++;
 
             SharedResources.Screen.WaitOne();
             SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
@@ -141,7 +140,7 @@ namespace ParcelLockers
                     cell.Parcel.Type = ParcelType.TOBEPICKEDUP;
                     parcelList.Add(cell.Parcel);
                     cell.IsTaken = false;
-                    m_NumParcels--;
+                    m_numShippedParcels--;
                     SharedResources.Screen.WaitOne();
                     SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
                     {
@@ -167,7 +166,7 @@ namespace ParcelLockers
 
             m_Cells[randomCellNum].IsTaken = true;
             m_Cells[randomCellNum].Parcel = shippedParcel;
-            m_NumParcels++;
+            m_numParcelsToPickUp++;
 
             SharedResources.Screen.WaitOne();
             SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
@@ -187,7 +186,7 @@ namespace ParcelLockers
                 if (cell.Parcel == parcelToTake)
                 {
                     cell.IsTaken = false;
-                    m_NumParcels--;
+                    m_numParcelsToPickUp--;
                     SharedResources.Screen.WaitOne();
                     SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
                     {

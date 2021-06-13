@@ -31,13 +31,13 @@ namespace ParcelLockers
         {
             
         }
-        protected void FadeOut()
+        protected void FadeOut(int imgId)
         {
 
             SharedResources.Screen.WaitOne();
             SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
             {
-                Img.Source = new BitmapImage(m_imagesUris[2]);
+                Img.Source = new BitmapImage(m_imagesUris[imgId]);
             }));
             SharedResources.Screen.ReleaseMutex();
 
@@ -48,7 +48,7 @@ namespace ParcelLockers
                 SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     if (i == 0)
-                        Img.Source = new BitmapImage(m_imagesUris[2]);
+                        Img.Source = new BitmapImage(m_imagesUris[imgId]);
                     Canvas.SetLeft(Img, Canvas.GetLeft(Img) + 1);
                     m_currentPos.x++;
                     Img.Opacity -= 0.05;
@@ -69,22 +69,22 @@ namespace ParcelLockers
                 if (vec.x > 0 && vec.y == 0) // right
                 {
                     Canvas.SetLeft(Img, Canvas.GetLeft(Img) + vec.x);
-                    m_currentPos.x++;
+                    m_currentPos.x += vec.x;
                 }
                 else if (vec.x < 0 && vec.y == 0) // left
                 {
                     Canvas.SetLeft(Img, Canvas.GetLeft(Img) + vec.x);
-                    m_currentPos.x--;
+                    m_currentPos.x += vec.x;
                 }
                 else if (vec.x == 0 && vec.y > 0) // down
                 {
                     Canvas.SetTop(Img, Canvas.GetTop(Img) + vec.y);
-                    m_currentPos.y++;
+                    m_currentPos.y += vec.y;
                 }
                 else // up
                 {
                     Canvas.SetTop(Img, Canvas.GetTop(Img) + vec.y);
-                    m_currentPos.y--;
+                    m_currentPos.y += vec.y;
                 }
 
             }));
@@ -104,7 +104,6 @@ namespace ParcelLockers
             SharedResources.Screen.WaitOne();
             SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
             {
-                Img.Source = new BitmapImage(m_imagesUris[0]);
                 Canvas.SetZIndex(Img, ZIndexGen++);
             }));
             m_waitingInQueue = true;
@@ -120,6 +119,16 @@ namespace ParcelLockers
             SharedResources.PlacesTakenInQueue[pId, 0] = false;
             SharedResources.NumPeopleInQueue[pId]--;
             SharedResources.SafeSharedResourceOperation.ReleaseMutex();
+        }
+
+        protected void ChangeImage(int imgId)
+        {
+            SharedResources.Screen.WaitOne();
+            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                Img.Source = new BitmapImage(m_imagesUris[imgId]);
+            }));
+            SharedResources.Screen.ReleaseMutex();
         }
 
     }

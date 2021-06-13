@@ -11,18 +11,23 @@ using System.Windows;
 
 namespace ParcelLockers
 {
+    /*
+     * Main simulation class, it includes all dynamic simulation entities
+     */
     public class Simulation
     {
-        Canvas m_Context = null; 
-        List<Human> m_People = new List<Human>();
-        Thread m_Thread = null;
-        int m_currentNumPeopleInSimulation = 0;
-        bool m_EndOfProgram = false;
+        private Thread m_Thread;
+        private Canvas m_Context;
+        private List<Human> m_People = new List<Human>();
+        
+        private int m_currentNumPeopleInSimulation = 0;
+        private int m_iterCounter = 0;
+        private int m_nextPersonAddIter = 0;
 
-        int m_iterCounter = 0;
-        int m_nextPersonAddIter = 0;
+        private bool m_EndOfProgram = false;
 
         public Thread Thread { get { return m_Thread; } }
+
         public Simulation(Canvas context, Window window)
         {
             SharedResources.Window = window;
@@ -65,46 +70,39 @@ namespace ParcelLockers
                 Thread.Sleep(Timeout.Infinite);
             }
             catch (ThreadInterruptedException e) { }
-            //m_Window.Show();
         }
-        /*
-         * Update
-         */
 
+        /*
+         * People threads are sleeping when waiting on Monitor, so their animations are updated from the main loop 
+         */
         private void UpdatePeoplePositions()
         {
             SharedResources.SafeSharedResourceOperation.WaitOne();
-            foreach (Human person in m_People)
+
+            foreach (Human human in m_People)
             {
-                bool[,] tab = SharedResources.PlacesTakenInQueue;
-                
-                //Monitor.Enter(SharedResources.ParcelLockers[person.QueueId]);
-                if (person.WaitingInQueue && !person.CameToTheParcelLocker)
+                if (human.WaitingInQueue && !human.CameToTheParcelLocker)
                 {
-                    if (person.PosInQueue == 0 && person.Position.y <= Defines.parcelLockerPos[0].y )
+                    if (human.PosInQueue == 0 && human.Position.y <= Defines.parcelLockerPos[0].y )
                     {
-                        person.CameToTheParcelLocker = true;
-                        person.Thread.Interrupt();
+                        human.CameToTheParcelLocker = true;
+                        human.Thread.Interrupt();
                     }
-                    else if(person.PosInQueue == 0)
+                    else if(human.PosInQueue == 0)
                     {
-                        person.MovePerson(new Coord(0, -1));
+                        human.MovePerson(new Coord(0, -(1 + (int)(Defines.simulationSpeed*2/10))));
                     }
-                    else if (!person.CameToTheParcelLocker)
+                    else if (!human.CameToTheParcelLocker)
                     {
-                        if(person.Position.y >= Defines.parcelLockerPos[0].y + person.PosInQueue * 30)
-                            person.MovePerson(new Coord(0, -1));
-                        else if (SharedResources.PlacesTakenInQueue[person.QueueId, person.PosInQueue - 1] == false)
-                        {
-                            
-                            SharedResources.PlacesTakenInQueue[person.QueueId, person.PosInQueue--] = false;
-                            SharedResources.PlacesTakenInQueue[person.QueueId, person.PosInQueue] = true;
-                            
+                        if(human.Position.y >= Defines.parcelLockerPos[0].y + human.PosInQueue * 30)
+                            human.MovePerson(new Coord(0, -(1 + (int)(Defines.simulationSpeed * 2 / 10))));
+                        else if (SharedResources.PlacesTakenInQueue[human.QueueId, human.PosInQueue - 1] == false)
+                        { 
+                            SharedResources.PlacesTakenInQueue[human.QueueId, human.PosInQueue--] = false;
+                            SharedResources.PlacesTakenInQueue[human.QueueId, human.PosInQueue] = true;
                         }
                     }
                 }
-                //Monitor.Exit(SharedResources.ParcelLockers[person.QueueId]);
-                
             }
             SharedResources.SafeSharedResourceOperation.ReleaseMutex();
         }
@@ -117,7 +115,6 @@ namespace ParcelLockers
         /*
          * Initialization 
          */
-
         private void InitCourier()
         {
             m_People.Add(new Courier(m_Context));
@@ -125,6 +122,8 @@ namespace ParcelLockers
         private void InitSharedResources()
         {
             SharedResources.ParcelsShippedToPeople = new List<Parcel>[Defines.numPeopleInSimulation];
+            SharedResources.ParcelsShippedToPeople = new List<Parcel>[Defines.numPeopleInSimulation];
+
             for (int i = 0; i < Defines.numPeopleInSimulation; i++)
                 SharedResources.ParcelsShippedToPeople[i] = new List<Parcel>();
         }
@@ -137,22 +136,35 @@ namespace ParcelLockers
 
         private void InitResources()
         {
-            Resources.AddUri(UriType.PARCELLOCKER, new Uri("/Resources/parcelLocker.png",UriKind.Relative));
+            for(int i = 0; i < 4; i++)
+                
+            Resources.AddUri(UriType.PARCELLOCKER, new Uri("/Resources/parcelLocker.png",UriKind.Relative),0);
 
-            Resources.AddUri(UriType.CELL, new Uri("/Resources/cellfree.png", UriKind.Relative));
-            Resources.AddUri(UriType.CELL, new Uri("/Resources/celltaken.png", UriKind.Relative));
-            Resources.AddUri(UriType.CELL, new Uri("/Resources/cellcollect.png", UriKind.Relative));
+            Resources.AddUri(UriType.CELL, new Uri("/Resources/cellfree.png", UriKind.Relative),0);
+            Resources.AddUri(UriType.CELL, new Uri("/Resources/celltaken.png", UriKind.Relative),0);
+            Resources.AddUri(UriType.CELL, new Uri("/Resources/cellcollect.png", UriKind.Relative),0);
 
-            Resources.AddUri(UriType.PERSON, new Uri("/Resources/patBack1.png", UriKind.Relative));
-            Resources.AddUri(UriType.PERSON, new Uri("/Resources/patLeft1.png", UriKind.Relative));
-            Resources.AddUri(UriType.PERSON, new Uri("/Resources/patRight1.png", UriKind.Relative));
+            Resources.AddUri(UriType.PERSON, new Uri("/Resources/p1Back.png", UriKind.Relative),0);
+            Resources.AddUri(UriType.PERSON, new Uri("/Resources/p1Left.png", UriKind.Relative),0);
+            Resources.AddUri(UriType.PERSON, new Uri("/Resources/p1Right.png", UriKind.Relative),0);
+            Resources.AddUri(UriType.PERSON, new Uri("/Resources/p2Back.png", UriKind.Relative), 1);
+            Resources.AddUri(UriType.PERSON, new Uri("/Resources/p2Left.png", UriKind.Relative), 1);
+            Resources.AddUri(UriType.PERSON, new Uri("/Resources/p2Right.png", UriKind.Relative), 1);
+            Resources.AddUri(UriType.PERSON, new Uri("/Resources/p3Back.png", UriKind.Relative), 2);
+            Resources.AddUri(UriType.PERSON, new Uri("/Resources/p3Left.png", UriKind.Relative), 2);
+            Resources.AddUri(UriType.PERSON, new Uri("/Resources/p3Right.png", UriKind.Relative), 2);
+            Resources.AddUri(UriType.PERSON, new Uri("/Resources/p4Back.png", UriKind.Relative), 3);
+            Resources.AddUri(UriType.PERSON, new Uri("/Resources/p4Left.png", UriKind.Relative), 3);
+            Resources.AddUri(UriType.PERSON, new Uri("/Resources/p4Right.png", UriKind.Relative), 3);
 
-            Resources.AddUri(UriType.COURIER, new Uri("/Resources/matBack1.png", UriKind.Relative));
-            Resources.AddUri(UriType.COURIER, new Uri("/Resources/matLeft1.png", UriKind.Relative));
-            Resources.AddUri(UriType.COURIER, new Uri("/Resources/matRight1.png", UriKind.Relative));
+            Resources.AddUri(UriType.COURIER, new Uri("/Resources/courierBack.png", UriKind.Relative),0);
+            Resources.AddUri(UriType.COURIER, new Uri("/Resources/courierLeft.png", UriKind.Relative),0);
+            Resources.AddUri(UriType.COURIER, new Uri("/Resources/courierRight.png", UriKind.Relative),0);
+            Resources.AddUri(UriType.COURIER, new Uri("/Resources/courierBack2.png", UriKind.Relative),0);
+            Resources.AddUri(UriType.COURIER, new Uri("/Resources/courierLeft2.png", UriKind.Relative),0);
+            Resources.AddUri(UriType.COURIER, new Uri("/Resources/courierRight2.png", UriKind.Relative),0);
 
-            Resources.AddUri(UriType.COURIERCAR, new Uri("/Resources/car.png", UriKind.Relative));
-            Resources.AddUri(UriType.COURIERCAR, new Uri("/Resources/car2.png", UriKind.Relative));
+            Resources.AddUri(UriType.COURIERCAR, new Uri("/Resources/car.png", UriKind.Relative),0);
         }
 
         private void InitParcelLockers()
@@ -172,7 +184,7 @@ namespace ParcelLockers
                 if (m_nextPersonAddIter == m_iterCounter)
                 {  
                     m_currentNumPeopleInSimulation++;
-                    m_nextPersonAddIter = rand.Next(200, 600);
+                    m_nextPersonAddIter = rand.Next(200-Defines.simulationSpeed*10, 800- Defines.simulationSpeed*35);
                     m_iterCounter = 0;
                     m_People.Add(new Person(m_Context)); 
                 }

@@ -55,7 +55,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Animator.cs" />
+    <Compile Include="src\Animator.cs" />
     <Compile Include="ConfigWindow.xaml.cs">
       <DependentUpon>ConfigWindow.xaml</DependentUpon>
     </Compile>
@@ -125,17 +125,27 @@
     <Resource Include="Resources\background.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\patBack1.png" />
-    <Resource Include="Resources\patLeft1.png" />
-    <Resource Include="Resources\patRight1.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\matBack1.png" />
-    <Resource Include="Resources\matLeft1.png" />
-    <Resource Include="Resources\matRight1.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\cellcollect.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\courierBack.png" />
+    <Resource Include="Resources\courierBack2.png" />
+    <Resource Include="Resources\courierLeft.png" />
+    <Resource Include="Resources\courierLeft2.png" />
+    <Resource Include="Resources\courierRight.png" />
+    <Resource Include="Resources\courierRight2.png" />
+    <Resource Include="Resources\p1Back.png" />
+    <Resource Include="Resources\p1Left.png" />
+    <Resource Include="Resources\p1Right.png" />
+    <Resource Include="Resources\p2Back.png" />
+    <Resource Include="Resources\p2Left.png" />
+    <Resource Include="Resources\p2Right.png" />
+    <Resource Include="Resources\p3Back.png" />
+    <Resource Include="Resources\p3Left.png" />
+    <Resource Include="Resources\p3Right.png" />
+    <Resource Include="Resources\p4Back.png" />
+    <Resource Include="Resources\p4Left.png" />
+    <Resource Include="Resources\p4Right.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
