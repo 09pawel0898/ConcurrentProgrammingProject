@@ -14,6 +14,7 @@ namespace ParcelLockers
     /*
      * Main simulation class, it includes all dynamic simulation entities
      */
+
     public class Simulation
     {
         private Thread m_Thread;
@@ -24,7 +25,8 @@ namespace ParcelLockers
         private int m_iterCounter = 0;
         private int m_nextPersonAddIter = 0;
 
-        private bool m_EndOfProgram = false;
+        private bool m_endOfProgram = false;
+        private Label[,] m_label = new Label[3,3];
 
         public Thread Thread { get { return m_Thread; } }
 
@@ -36,6 +38,7 @@ namespace ParcelLockers
             InitResources();
             InitParcelLockers();
             InitSimulationThread();
+            InitLabels();
         }
 
         private void Run()
@@ -44,7 +47,7 @@ namespace ParcelLockers
             InitSharedResources();
             InitCourier();
 
-            while (!m_EndOfProgram)
+            while (!m_endOfProgram)
             {
                 Thread.Sleep(2);
                 TryAddPeopleToSimulation();
@@ -109,7 +112,23 @@ namespace ParcelLockers
 
         private void UpdateLabels()
         {
-
+            SharedResources.Screen.WaitOne();
+            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    for (int j = 0; j < 3; j++)
+                    {
+                        if (j == 0)
+                            m_label[i, j].Content = "People in queue : " + SharedResources.NumPeopleInQueue[i];
+                        else if (j == 1)
+                            m_label[i, j].Content = "Shipped parcels : " + SharedResources.ParcelLockers[i].NumShippedParcels;
+                        else if (j == 2)
+                            m_label[i, j].Content = "Parcels to be picked up : " + SharedResources.ParcelLockers[i].NumParcelsToPickUp;
+                    }
+                }
+            }));
+            SharedResources.Screen.ReleaseMutex();
         }
 
         /*
@@ -132,6 +151,40 @@ namespace ParcelLockers
         {
             m_Thread = new Thread(Run);
             m_Thread.Start();
+        }
+
+        private void InitLabels()
+        {
+            int shiftX = 0;
+            int shiftY = 0;
+
+            SharedResources.Screen.WaitOne();
+            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    for (int j = 0; j < 3; j++)
+                    {
+                        m_label[i, j] = new Label();
+                        //m_label[i, j].FontSize = 22;
+
+                        if (j == 0)
+                            m_label[i, j].Content = "People in queue : ";
+                        else if (j == 1)
+                            m_label[i, j].Content = "Shipped parcels : ";
+                        else if (j == 2)
+                            m_label[i, j].Content = "Parcels to be picked up : ";
+
+                        m_Context.Children.Add(m_label[i,j]);
+                        Canvas.SetLeft(m_label[i, j], 10 + shiftX);
+                        Canvas.SetTop(m_label[i, j], 250 + shiftY);
+                        shiftY += 20;
+                    }
+                    shiftY = 0;
+                    shiftX += 400;
+                }
+            }));
+            SharedResources.Screen.ReleaseMutex();
         }
 
         private void InitResources()

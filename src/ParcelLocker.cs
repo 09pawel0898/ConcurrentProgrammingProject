@@ -20,7 +20,7 @@ namespace ParcelLockers
         private ParcelType m_parcelType = new ParcelType();
         private int m_parcelReceiverId;
         private int m_destinationParcelLocker;
-
+        private int m_ID;
         public ParcelType Type { get { return m_parcelType; } set { m_parcelType = value; } }
         public int ParcelReceiverId { get { return m_parcelReceiverId; } set { m_parcelReceiverId = value; } }
         public int DestinationParcelLocker { get { return m_destinationParcelLocker; } set { m_destinationParcelLocker = value; } }
@@ -70,6 +70,7 @@ namespace ParcelLockers
 
         public int Id { get { return m_Id; } set { m_Id = value; } }
         public int NumShippedParcels { get { return m_numShippedParcels; } }
+        public int NumParcelsToPickUp { get { return m_numParcelsToPickUp; } }
         public ParcelLocker(Coord offset,Canvas context)
         {
             m_Id = IDGen;
@@ -183,16 +184,18 @@ namespace ParcelLockers
         {
             foreach (Cell cell in m_Cells)
             {
-                if (cell.Parcel == parcelToTake)
+                if (cell.IsTaken && cell.Parcel == parcelToTake)
                 {
                     cell.IsTaken = false;
-                    m_numParcelsToPickUp--;
+                    if(m_numParcelsToPickUp>0)
+                        m_numParcelsToPickUp--;
                     SharedResources.Screen.WaitOne();
                     SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
                     {
                         cell.Img.Source = new BitmapImage(Resources.Instance.Cells[0]);
                     }));
                     SharedResources.Screen.ReleaseMutex();
+                    return;
                 }
             }
         }

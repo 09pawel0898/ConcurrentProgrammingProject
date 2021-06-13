@@ -123,7 +123,7 @@ namespace ParcelLockers
 
         private void GoToProperParcelLockerPath()
         {
-            while (m_currentPos.x != Defines.parcelLockerPos[m_currentParcelLocker].x)
+            while (m_currentPos.x > Defines.parcelLockerPos[m_currentParcelLocker].x)
             {
                 Thread.Sleep(2);
                 MovePerson(new Coord(-(1 + (int)(Defines.simulationSpeed * 2 / 10)), 0));

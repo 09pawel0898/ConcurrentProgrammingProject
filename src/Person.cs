@@ -7,6 +7,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Controls;
 using System.Threading;
 using System.Windows.Threading;
+using System.Windows;
 
 namespace ParcelLockers
 {
@@ -51,7 +52,9 @@ namespace ParcelLockers
                 // two action types (sending or picking up a parcel)
                 switch (m_currentAction)
                 {
-                    case PersonAction.SENDING:      SimulateSendingParcel();    break;
+                    case PersonAction.SENDING:
+                        Thread.Sleep(rand.Next(5000 - Defines.simulationSpeed * 450, 10000 - Defines.simulationSpeed * 700));
+                        SimulateSendingParcel();    break;
                     case PersonAction.PICKINGUP:    SimulatePickingUpParcel();  break;
                 }
                 FadeOut(2);
@@ -95,7 +98,14 @@ namespace ParcelLockers
             EnterTheQueue(pId);
 
             // threads that enter the monitor are waiting in FIFO queue
-            Monitor.Enter(SharedResources.ParcelLockers[pId]);
+            try
+            {
+                Monitor.Enter(SharedResources.ParcelLockers[pId]);
+            }
+            catch(Exception e )
+            {
+                MessageBox.Show(e.Message);
+            }
             try
             {
                 // waiting to get to the first position
