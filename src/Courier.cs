@@ -7,6 +7,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Controls;
 using System.Threading;
 using System.Windows.Threading;
+using System.Windows;
 
 namespace ParcelLockers
 {
@@ -135,7 +136,15 @@ namespace ParcelLockers
             EnterTheQueue(m_currentParcelLocker);
             int temp = Defines.simulationSpeed;
 
-            Monitor.Enter(SharedResources.ParcelLockers[m_currentParcelLocker]);
+            try
+            {
+                QueuedLock.Enter(m_currentParcelLocker);
+                //Monitor.Enter(SharedResources.ParcelLockers[m_currentParcelLocker]);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
+            }
             try
             {
                 // waiting to get to the first position
@@ -164,7 +173,8 @@ namespace ParcelLockers
             }
             finally
             {
-                Monitor.Exit(SharedResources.ParcelLockers[m_currentParcelLocker]);
+                QueuedLock.Exit(m_currentParcelLocker);
+                //Monitor.Exit(SharedResources.ParcelLockers[m_currentParcelLocker]);
             }
             LeaveTheQueue(m_currentParcelLocker);
         }

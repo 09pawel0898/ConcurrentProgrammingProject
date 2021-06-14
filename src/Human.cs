@@ -6,19 +6,19 @@ using System.Collections.Generic;
 
 namespace ParcelLockers
 {
-    class Human
+    public class Human
     {
         
         protected static int ZIndexGen = 0;
         protected Thread m_Thread;
         protected Canvas m_Context;
-        protected Animator m_Animator;
         protected Coord m_currentPos;
         protected int m_posInQueue = 0;
         protected int m_queueId = 0;
         protected bool m_waitingInQueue = false;
         protected bool m_cameToTheParcelLocker = false;
         protected List<Uri> m_imagesUris;
+
         public Coord Position { get { return m_currentPos; } set { m_currentPos = value; } }
         public Image Img { get; set; }
         public int PosInQueue { get { return m_posInQueue; } set { m_posInQueue = value; } }
@@ -95,12 +95,12 @@ namespace ParcelLockers
         {
             SharedResources.SafeSharedResourceOperation.WaitOne();
 
+            //m_posInQueue = ParcelLocker.GetLastFreePositionInQueue(pId);
             m_posInQueue = SharedResources.NumPeopleInQueue[pId];
 
             SharedResources.PlacesTakenInQueue[pId, SharedResources.NumPeopleInQueue[pId]] = true;
             SharedResources.NumPeopleInQueue[pId]++;
             
-
             SharedResources.Screen.WaitOne();
             SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
             {
@@ -108,6 +108,7 @@ namespace ParcelLockers
             }));
             m_waitingInQueue = true;
             SharedResources.Screen.ReleaseMutex();
+
             SharedResources.SafeSharedResourceOperation.ReleaseMutex();
         }
 
@@ -116,6 +117,7 @@ namespace ParcelLockers
             SharedResources.SafeSharedResourceOperation.WaitOne();
             m_waitingInQueue = false;
             m_cameToTheParcelLocker = false;
+            //SharedResources.PlacesTakenInQueue[pId, 1] = false;
             SharedResources.PlacesTakenInQueue[pId, 0] = false;
             SharedResources.NumPeopleInQueue[pId]--;
             SharedResources.SafeSharedResourceOperation.ReleaseMutex();

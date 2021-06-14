@@ -27,8 +27,7 @@ namespace ParcelLockers
         {
             m_Id = IDGen++;
             Random rand = new Random();
-            int randId = rand.Next(0, 4);
-            m_Animator = new Animator(2, Resources.Instance.People[randId]);
+            int randId = rand.Next(0, 6);
             m_Context = context;
             m_imagesUris = Resources.Instance.People[randId];
             InitImage();
@@ -94,15 +93,21 @@ namespace ParcelLockers
 
         private void TryToQueueUpAndGetToTheParcelLocker(int pId)
         {
+            
+            //DEBUG
+            bool[,] temp = SharedResources.PlacesTakenInQueue;
+            List<Human> listPeople = Simulation.m_People;
+
             Random rand = new Random();
             EnterTheQueue(pId);
 
             // threads that enter the monitor are waiting in FIFO queue
             try
             {
-                Monitor.Enter(SharedResources.ParcelLockers[pId]);
+                QueuedLock.Enter(pId);
+                //Monitor.Enter(SharedResources.ParcelLockers[pId]);
             }
-            catch(Exception e )
+            catch(Exception e)
             {
                 MessageBox.Show(e.Message);
             }
@@ -133,7 +138,8 @@ namespace ParcelLockers
             }
             finally
             {
-                Monitor.Exit(SharedResources.ParcelLockers[pId]);
+                QueuedLock.Exit(pId);
+                //Monitor.Exit(SharedResources.ParcelLockers[pId]);
             }
             LeaveTheQueue(pId);
         }

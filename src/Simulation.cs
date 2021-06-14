@@ -17,9 +17,18 @@ namespace ParcelLockers
 
     public class Simulation
     {
+        /*
+         * Debug
+         * 
+         */
+        Label label1 = new Label();
+        int c = 0;
+
+        /// ///////////////////
         private Thread m_Thread;
         private Canvas m_Context;
-        private List<Human> m_People = new List<Human>();
+        //private List<Human> m_People = new List<Human>();
+        public static List<Human> m_People = new List<Human>();
         
         private int m_currentNumPeopleInSimulation = 0;
         private int m_iterCounter = 0;
@@ -78,11 +87,15 @@ namespace ParcelLockers
         }
 
         /*
-         * People threads are sleeping when waiting on Monitor, so their animations are updated from the main loop 
+         * People threads are sleeping when waiting on Monitor, so the queue animation is updated in the main loop 
          */
         private void UpdatePeoplePositions()
         {
+            //DEBUG
+            bool[,] temp = SharedResources.PlacesTakenInQueue;
+
             SharedResources.SafeSharedResourceOperation.WaitOne();
+            
 
             foreach (Human human in m_People)
             {
@@ -92,6 +105,10 @@ namespace ParcelLockers
                     {
                         human.CameToTheParcelLocker = true;
                         human.Thread.Interrupt();
+                        //Debug
+                        c++;
+                        SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>  { label1.Content = "Counter : " + c; }));
+                        ///////
                     }
                     else if(human.PosInQueue == 0)
                     {
@@ -102,7 +119,19 @@ namespace ParcelLockers
                         if(human.Position.y >= Defines.parcelLockerPos[0].y + human.PosInQueue * 30)
                             human.MovePerson(new Coord(0, -(1 + (int)(Defines.simulationSpeed * 2 / 10))));
                         else if (SharedResources.PlacesTakenInQueue[human.QueueId, human.PosInQueue - 1] == false)
-                        { 
+                        {
+                            /*
+                            if (human.PosInQueue == 1)
+                            {
+                                human.PosInQueue--;
+                                SharedResources.PlacesTakenInQueue[human.QueueId, human.PosInQueue] = true;
+                            }
+                            else 
+                            {
+                                SharedResources.PlacesTakenInQueue[human.QueueId, human.PosInQueue--] = false;
+                                SharedResources.PlacesTakenInQueue[human.QueueId, human.PosInQueue] = true;
+                            }
+                            */
                             SharedResources.PlacesTakenInQueue[human.QueueId, human.PosInQueue--] = false;
                             SharedResources.PlacesTakenInQueue[human.QueueId, human.PosInQueue] = true;
                         }
@@ -163,7 +192,7 @@ namespace ParcelLockers
             SharedResources.Screen.WaitOne();
             SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
             {
-                for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 3; i++)
                 {
                     for (int j = 0; j < 3; j++)
                     {
@@ -185,6 +214,12 @@ namespace ParcelLockers
                     shiftY = 0;
                     shiftX += 400;
                 }
+                // DEBUG
+                label1.Content = "Counter : 0";
+                m_Context.Children.Add(label1);
+                Canvas.SetLeft(label1, 20);
+                Canvas.SetTop(label1, 20);
+                /////////////////////////////////
             }));
             SharedResources.Screen.ReleaseMutex();
         }
@@ -211,6 +246,12 @@ namespace ParcelLockers
             Resources.AddUri(UriType.PERSON, new Uri("/Resources/p4Back.png", UriKind.Relative), 3);
             Resources.AddUri(UriType.PERSON, new Uri("/Resources/p4Left.png", UriKind.Relative), 3);
             Resources.AddUri(UriType.PERSON, new Uri("/Resources/p4Right.png", UriKind.Relative), 3);
+            Resources.AddUri(UriType.PERSON, new Uri("/Resources/p5Back.png", UriKind.Relative), 4);
+            Resources.AddUri(UriType.PERSON, new Uri("/Resources/p5Left.png", UriKind.Relative), 4);
+            Resources.AddUri(UriType.PERSON, new Uri("/Resources/p5Right.png", UriKind.Relative), 4);
+            Resources.AddUri(UriType.PERSON, new Uri("/Resources/p6Back.png", UriKind.Relative), 5);
+            Resources.AddUri(UriType.PERSON, new Uri("/Resources/p6Left.png", UriKind.Relative), 5);
+            Resources.AddUri(UriType.PERSON, new Uri("/Resources/p6Right.png", UriKind.Relative), 5);
 
             Resources.AddUri(UriType.COURIER, new Uri("/Resources/courierBack.png", UriKind.Relative),0);
             Resources.AddUri(UriType.COURIER, new Uri("/Resources/courierLeft.png", UriKind.Relative),0);

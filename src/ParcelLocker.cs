@@ -147,7 +147,6 @@ namespace ParcelLockers
                         cell.Img.Source = new BitmapImage(Resources.Instance.Cells[0]);
                     }));
                     SharedResources.Screen.ReleaseMutex();
-
                 }
             }
             return parcelList;
@@ -199,5 +198,21 @@ namespace ParcelLockers
                 }
             }
         }
+
+        /*
+        public static int GetLastFreePositionInQueue(int queueId)
+        {
+            int result = 0;
+            for(int i = 0; i < Defines.maxPeopleInQueue; i++)
+            {
+                if (SharedResources.PlacesTakenInQueue[queueId, i] == false)
+                {
+                    result = i;
+                    return result;
+                }
+            }
+            return -1;
+        }
+       */
     }
 }

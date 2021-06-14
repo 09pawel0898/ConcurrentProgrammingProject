@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ParcelLockers
 {
-    struct Coord
+    public struct Coord
     {
         public int x;
         public int y;

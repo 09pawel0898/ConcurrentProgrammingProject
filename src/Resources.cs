@@ -19,7 +19,7 @@ namespace ParcelLockers
     {
         private static Resources instance = new Resources();
         private static List<Uri>  parcelLockerUris = new List<Uri>();
-        private static List<Uri>[]  peopleUris = new List<Uri>[4];
+        private static List<Uri>[]  peopleUris = new List<Uri>[6];
         private static List<Uri>  courierUris = new List<Uri>();
         private static List<Uri>  cellsUris = new List<Uri>();
         private static List<Uri> courierCarUris = new List<Uri>();

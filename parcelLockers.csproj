@@ -55,10 +55,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="src\Animator.cs" />
     <Compile Include="ConfigWindow.xaml.cs">
       <DependentUpon>ConfigWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="src\QueuedLock.cs" />
     <Compile Include="src\Courier.cs" />
     <Compile Include="src\CourierCar.cs" />
     <Compile Include="src\Human.cs" />
@@ -146,6 +146,14 @@
     <Resource Include="Resources\p4Back.png" />
     <Resource Include="Resources\p4Left.png" />
     <Resource Include="Resources\p4Right.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\p5Back.png" />
+    <Resource Include="Resources\p5Left.png" />
+    <Resource Include="Resources\p5Right.png" />
+    <Resource Include="Resources\p6Back.png" />
+    <Resource Include="Resources\p6Left.png" />
+    <Resource Include="Resources\p6Right.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
