@@ -135,7 +135,7 @@ namespace ParcelLockers
 
             foreach (Cell cell in m_Cells)
             {
-                if(cell.IsTaken)
+                if(cell.IsTaken && cell.Parcel.Type == ParcelType.SENT)
                 {
                     cell.Parcel.Type = ParcelType.TOBEPICKEDUP;
                     parcelList.Add(cell.Parcel);
