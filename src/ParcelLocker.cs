@@ -169,10 +169,12 @@ namespace ParcelLockers
             m_numParcelsToPickUp++;
 
             SharedResources.Screen.WaitOne();
+
             SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
             {
                 m_Cells[randomCellNum].Img.Source = new BitmapImage(Resources.Instance.Cells[2]);
             }));
+
             SharedResources.Screen.ReleaseMutex();
 
             // add the package to the list of packages sent to this addressee
@@ -183,11 +185,10 @@ namespace ParcelLockers
         {
             foreach (Cell cell in m_Cells)
             {
-                if (cell.IsTaken && cell.Parcel == parcelToTake)
+                if (cell.IsTaken && cell.Parcel == parcelToTake && cell.Parcel.Type == ParcelType.TOBEPICKEDUP)
                 {
                     cell.IsTaken = false;
-                    if(m_numParcelsToPickUp>0)
-                        m_numParcelsToPickUp--;
+                    m_numParcelsToPickUp--;
                     SharedResources.Screen.WaitOne();
                     SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
                     {
