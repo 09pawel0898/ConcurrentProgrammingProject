@@ -39,7 +39,7 @@ namespace ParcelLockers
         {
             if (Defines.parcelLockerPos[pId].x > m_Position.x)
             {
-                while (m_Position.x != Defines.courierCarPos[pId].x)
+                while (m_Position.x < Defines.courierCarPos[pId].x)
                 {
                     Thread.Sleep(2);
                     MoveRight();
@@ -47,7 +47,7 @@ namespace ParcelLockers
             }
             else
             {
-                while (m_Position.x != Defines.courierCarPos[Defines.numParcelLockers - 1].x + 500)
+                while (m_Position.x < Defines.courierCarPos[Defines.numParcelLockers - 1].x + 500)
                 {
                     Thread.Sleep(2);
                     MoveRight();
@@ -60,12 +60,7 @@ namespace ParcelLockers
                     m_Position.x = Defines.courierCarPos[0].x - 500;
                 }));
                 SharedResources.Screen.ReleaseMutex();
-
-                while (m_Position.x != Defines.courierCarPos[pId].x)
-                {
-                    Thread.Sleep(2);
-                    MoveRight();
-                }
+                DriveToTheParcelLocker(0);
             }
         }
 
@@ -74,8 +69,8 @@ namespace ParcelLockers
             SharedResources.Screen.WaitOne();
             SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
             {
-                //int X = 1 + (int)(Defines.simulationSpeed * 2 / 10);
-                int X = 1;
+                int X = 1 + (int)(Defines.simulationSpeed * 2 / 10);
+                //int X = 1;
                 Canvas.SetLeft(Img, Canvas.GetLeft(Img) + X);
                 m_Position.x+=X;
             }));

@@ -20,7 +20,6 @@ namespace ParcelLockers
         private ParcelType m_parcelType = new ParcelType();
         private int m_parcelReceiverId;
         private int m_destinationParcelLocker;
-        private int m_ID;
         public ParcelType Type { get { return m_parcelType; } set { m_parcelType = value; } }
         public int ParcelReceiverId { get { return m_parcelReceiverId; } set { m_parcelReceiverId = value; } }
         public int DestinationParcelLocker { get { return m_destinationParcelLocker; } set { m_destinationParcelLocker = value; } }

@@ -60,6 +60,8 @@ namespace ParcelLockers
         {
             SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
             {
+                while (!SharedResources.Window.IsActive)
+                    Thread.Sleep(1);
                 ConfigWindow configWindow = new ConfigWindow();
                 configWindow.Owner = SharedResources.Window;
                 configWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
