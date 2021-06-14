@@ -60,7 +60,6 @@ namespace ParcelLockers
                 ResetPosition();
                 
                 // Sleep for some time
-                //Thread.Sleep(rand.Next(1000, 4000));
                 Thread.Sleep(rand.Next(5000 - Defines.simulationSpeed * 450, 10000 - Defines.simulationSpeed * 700));
             }
         }
@@ -146,8 +145,7 @@ namespace ParcelLockers
 
         private void ResetPosition()
         {
-            SharedResources.Screen.WaitOne();
-            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+            ScreenOperation.Perform(new Action(() =>
             {
                 Canvas.SetLeft(Img, Defines.sidewalkSpawnPos.x);
                 Canvas.SetTop(Img, Defines.sidewalkSpawnPos.y);
@@ -155,13 +153,11 @@ namespace ParcelLockers
                 Img.Opacity = 1;
                 Canvas.SetZIndex(Img, 200000);
             }));
-            SharedResources.Screen.ReleaseMutex();
         }
 
         private void InitImage()
         {
-            SharedResources.Screen.WaitOne();
-            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+            ScreenOperation.Perform(new Action(() =>
             {
                 Img = new Image
                 {
@@ -174,7 +170,6 @@ namespace ParcelLockers
                 Canvas.SetLeft(Img, Defines.sidewalkSpawnPos.x);
                 Canvas.SetTop(Img, Defines.sidewalkSpawnPos.y);
             }));
-            SharedResources.Screen.ReleaseMutex();
             m_currentPos = new Coord(Defines.sidewalkSpawnPos.x, Defines.sidewalkSpawnPos.y);
         }
     }

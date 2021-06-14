@@ -53,28 +53,23 @@ namespace ParcelLockers
                     MoveRight();
                 }
 
-                SharedResources.Screen.WaitOne();
-                SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+                ScreenOperation.Perform(new Action(() =>
                 {
                     Canvas.SetLeft(Img, Defines.courierCarPos[0].x - 500);
                     m_Position.x = Defines.courierCarPos[0].x - 500;
                 }));
-                SharedResources.Screen.ReleaseMutex();
                 DriveToTheParcelLocker(0);
             }
         }
 
         private void MoveRight()
         {
-            SharedResources.Screen.WaitOne();
-            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+            ScreenOperation.Perform(new Action(() =>
             {
                 int X = 1 + (int)(Defines.simulationSpeed * 2 / 10);
-                //int X = 1;
                 Canvas.SetLeft(Img, Canvas.GetLeft(Img) + X);
                 m_Position.x+=X;
             }));
-            SharedResources.Screen.ReleaseMutex();
         }
     }
 }

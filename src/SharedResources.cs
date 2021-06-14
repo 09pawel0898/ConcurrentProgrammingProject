@@ -19,4 +19,14 @@ namespace ParcelLockers
         public static bool[,] PlacesTakenInQueue = new bool[Defines.numParcelLockers, Defines.maxPeopleInQueue];
         public static List<Parcel>[] ParcelsShippedToPeople;
     }
+
+    class ScreenOperation
+    {
+        public static void Perform(Action action)
+        {
+            SharedResources.Screen.WaitOne();
+            SharedResources.Window.Dispatcher.BeginInvoke(action);
+            SharedResources.Screen.ReleaseMutex();
+        }
+    }
 }

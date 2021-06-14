@@ -36,10 +36,6 @@ namespace ParcelLockers
         public List<Uri> Cells { get { return cellsUris; } }
         public List<Uri> CourierCars { get { return courierCarUris; } }
 
-        /* Uri description 
-         * 
-         * 
-         */
         public static void AddUri(UriType uriType, Uri uri, int personId)
         {
             switch(uriType)

@@ -34,18 +34,15 @@ namespace ParcelLockers
         protected void FadeOut(int imgId)
         {
 
-            SharedResources.Screen.WaitOne();
-            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+            ScreenOperation.Perform(new Action(() =>
             {
                 Img.Source = new BitmapImage(m_imagesUris[imgId]);
             }));
-            SharedResources.Screen.ReleaseMutex();
 
             for (int i = 0; i < 40; i++)
             {
                 Thread.Sleep(2);
-                SharedResources.Screen.WaitOne();
-                SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+                ScreenOperation.Perform(new Action(() =>
                 {
                     if (i == 0)
                         Img.Source = new BitmapImage(m_imagesUris[imgId]);
@@ -53,7 +50,6 @@ namespace ParcelLockers
                     m_currentPos.x++;
                     Img.Opacity -= 0.05;
                 }));
-                SharedResources.Screen.ReleaseMutex();
             }
         }
 
@@ -63,8 +59,7 @@ namespace ParcelLockers
 
         public void MovePerson(Coord vec)
         {
-            SharedResources.Screen.WaitOne();
-            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+            ScreenOperation.Perform(new Action(() =>
             {
                 if (vec.x > 0 && vec.y == 0) // right
                 {
@@ -86,9 +81,7 @@ namespace ParcelLockers
                     Canvas.SetTop(Img, Canvas.GetTop(Img) + vec.y);
                     m_currentPos.y += vec.y;
                 }
-
             }));
-            SharedResources.Screen.ReleaseMutex();
         }
 
         protected void EnterTheQueue(int pId)
@@ -100,14 +93,12 @@ namespace ParcelLockers
 
             SharedResources.PlacesTakenInQueue[pId, SharedResources.NumPeopleInQueue[pId]] = true;
             SharedResources.NumPeopleInQueue[pId]++;
-            
-            SharedResources.Screen.WaitOne();
-            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+
+            ScreenOperation.Perform(new Action(() =>
             {
                 Canvas.SetZIndex(Img, ZIndexGen++);
             }));
             m_waitingInQueue = true;
-            SharedResources.Screen.ReleaseMutex();
 
             SharedResources.SafeSharedResourceOperation.ReleaseMutex();
         }
@@ -117,7 +108,6 @@ namespace ParcelLockers
             SharedResources.SafeSharedResourceOperation.WaitOne();
             m_waitingInQueue = false;
             m_cameToTheParcelLocker = false;
-            //SharedResources.PlacesTakenInQueue[pId, 1] = false;
             SharedResources.PlacesTakenInQueue[pId, 0] = false;
             SharedResources.NumPeopleInQueue[pId]--;
             SharedResources.SafeSharedResourceOperation.ReleaseMutex();
@@ -125,12 +115,10 @@ namespace ParcelLockers
 
         protected void ChangeImage(int imgId)
         {
-            SharedResources.Screen.WaitOne();
-            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+            ScreenOperation.Perform(new Action(() =>
             {
                 Img.Source = new BitmapImage(m_imagesUris[imgId]);
             }));
-            SharedResources.Screen.ReleaseMutex();
         }
 
     }

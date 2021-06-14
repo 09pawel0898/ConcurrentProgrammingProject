@@ -20,13 +20,12 @@ namespace ParcelLockers
     class Courier : Human
     {
         private CourierCar m_courierCar;
+        private List<Parcel>[] m_shippedParcelsToParcelLocker;
         private int m_currentParcelLocker;
-        private List<Parcel>[] m_shippedParcelsToParcelLocker; 
         private CourierAction m_currentAction;
 
         public Courier(Canvas context)
         {
-            //m_Animator = new Animator(2, Resources.Instance.People);
             m_Context = context;
             m_imagesUris = Resources.Instance.Couriers;
             m_shippedParcelsToParcelLocker = new List<Parcel>[Defines.numParcelLockers];
@@ -155,7 +154,6 @@ namespace ParcelLockers
                 catch (ThreadInterruptedException e) { }
 
                 // taking selected actions on a shared resource
-                //Thread.Sleep(4000);
                 Thread.Sleep(rand.Next(5000 - Defines.simulationSpeed * 400, 10000 - Defines.simulationSpeed * 500));
 
                 switch (m_currentAction)
@@ -169,7 +167,6 @@ namespace ParcelLockers
                         ChangeImage(2);
                         break;
                 }
-                
             }
             finally
             {
@@ -181,23 +178,18 @@ namespace ParcelLockers
 
         private void ResetPosition()
         {
-            SharedResources.Screen.WaitOne();
-            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+            ScreenOperation.Perform(new Action(() =>
             {
-                //changeImage(1);
                 Canvas.SetLeft(Img, Defines.courierSpawnPos[m_currentParcelLocker].x);
                 Canvas.SetTop(Img, Defines.courierSpawnPos[m_currentParcelLocker].y);
                 m_currentPos = new Coord(Defines.courierSpawnPos[m_currentParcelLocker].x, Defines.courierSpawnPos[m_currentParcelLocker].y);
                 Canvas.SetZIndex(Img, 200001);
             }));
-            SharedResources.Screen.ReleaseMutex();
         }
 
         private void SetCourierOpacity(double value)
         {
-            SharedResources.Screen.WaitOne();
-            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() => { Img.Opacity = value; }));
-            SharedResources.Screen.ReleaseMutex();
+            ScreenOperation.Perform(new Action(() => { Img.Opacity = value; }));
         }
 
         private void TakeShippedParcels()
@@ -221,8 +213,7 @@ namespace ParcelLockers
 
         private void InitImage()
         {
-            SharedResources.SafeSharedResourceOperation.WaitOne();
-            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+            ScreenOperation.Perform(new Action(() =>
             {
                 m_courierCar = new CourierCar(m_Context);
                 Img = new Image
@@ -237,8 +228,6 @@ namespace ParcelLockers
                 Canvas.SetLeft(Img, Defines.courierSpawnPos[0].x);
                 Canvas.SetTop(Img, Defines.courierSpawnPos[0].y);
             }));
-            SharedResources.SafeSharedResourceOperation.ReleaseMutex();
         }
-
     }
 }

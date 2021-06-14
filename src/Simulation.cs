@@ -17,14 +17,6 @@ namespace ParcelLockers
 
     public class Simulation
     {
-        /*
-         * Debug
-         * 
-         */
-        Label label1 = new Label();
-        int c = 0;
-
-        /// ///////////////////
         private Thread m_Thread;
         private Canvas m_Context;
         //private List<Human> m_People = new List<Human>();
@@ -67,7 +59,7 @@ namespace ParcelLockers
 
         private void Config()
         {
-            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+            ScreenOperation.Perform(new Action(() =>
             {
                 while (!SharedResources.Window.IsActive)
                     Thread.Sleep(1);
@@ -75,7 +67,6 @@ namespace ParcelLockers
                 configWindow.Owner = SharedResources.Window;
                 configWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 configWindow.Show();
-                
             }));
 
             // Sleep until the config is over
@@ -91,11 +82,7 @@ namespace ParcelLockers
          */
         private void UpdatePeoplePositions()
         {
-            //DEBUG
-            bool[,] temp = SharedResources.PlacesTakenInQueue;
-
             SharedResources.SafeSharedResourceOperation.WaitOne();
-            
 
             foreach (Human human in m_People)
             {
@@ -105,10 +92,6 @@ namespace ParcelLockers
                     {
                         human.CameToTheParcelLocker = true;
                         human.Thread.Interrupt();
-                        //Debug
-                        c++;
-                        SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>  { label1.Content = "Counter : " + c; }));
-                        ///////
                     }
                     else if(human.PosInQueue == 0)
                     {
@@ -120,18 +103,6 @@ namespace ParcelLockers
                             human.MovePerson(new Coord(0, -(1 + (int)(Defines.simulationSpeed * 2 / 10))));
                         else if (SharedResources.PlacesTakenInQueue[human.QueueId, human.PosInQueue - 1] == false)
                         {
-                            /*
-                            if (human.PosInQueue == 1)
-                            {
-                                human.PosInQueue--;
-                                SharedResources.PlacesTakenInQueue[human.QueueId, human.PosInQueue] = true;
-                            }
-                            else 
-                            {
-                                SharedResources.PlacesTakenInQueue[human.QueueId, human.PosInQueue--] = false;
-                                SharedResources.PlacesTakenInQueue[human.QueueId, human.PosInQueue] = true;
-                            }
-                            */
                             SharedResources.PlacesTakenInQueue[human.QueueId, human.PosInQueue--] = false;
                             SharedResources.PlacesTakenInQueue[human.QueueId, human.PosInQueue] = true;
                         }
@@ -143,8 +114,7 @@ namespace ParcelLockers
 
         private void UpdateLabels()
         {
-            SharedResources.Screen.WaitOne();
-            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+            ScreenOperation.Perform(new Action(() =>
             {
                 for (int i = 0; i < 3; i++)
                 {
@@ -159,7 +129,6 @@ namespace ParcelLockers
                     }
                 }
             }));
-            SharedResources.Screen.ReleaseMutex();
         }
 
         /*
@@ -189,10 +158,9 @@ namespace ParcelLockers
             int shiftX = 0;
             int shiftY = 0;
 
-            SharedResources.Screen.WaitOne();
-            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+            ScreenOperation.Perform(new Action(() =>
             {
-            for (int i = 0; i < 3; i++)
+                for (int i = 0; i < 3; i++)
                 {
                     for (int j = 0; j < 3; j++)
                     {
@@ -214,14 +182,7 @@ namespace ParcelLockers
                     shiftY = 0;
                     shiftX += 400;
                 }
-                // DEBUG
-                label1.Content = "Counter : 0";
-                m_Context.Children.Add(label1);
-                Canvas.SetLeft(label1, 20);
-                Canvas.SetTop(label1, 20);
-                /////////////////////////////////
             }));
-            SharedResources.Screen.ReleaseMutex();
         }
 
         private void InitResources()

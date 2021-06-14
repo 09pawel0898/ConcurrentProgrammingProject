@@ -17,43 +17,34 @@ namespace ParcelLockers
     }
     class Parcel
     {
-        private ParcelType m_parcelType = new ParcelType();
-        private int m_parcelReceiverId;
-        private int m_destinationParcelLocker;
-        public ParcelType Type { get { return m_parcelType; } set { m_parcelType = value; } }
-        public int ParcelReceiverId { get { return m_parcelReceiverId; } set { m_parcelReceiverId = value; } }
-        public int DestinationParcelLocker { get { return m_destinationParcelLocker; } set { m_destinationParcelLocker = value; } }
+        public ParcelType Type { get; set; }
+        public int ParcelReceiverId { get; set; }
+        public int DestinationParcelLocker { get; set; }
     }
 
     class Cell
     {
         private static int IDGen = 0;
-        private int m_Id;
-        private Coord m_Pos = new Coord(0,0);
-        private Canvas m_Context;
-        private Parcel m_Parcel;
-        public Parcel Parcel { get { return m_Parcel; } set { m_Parcel = value; } }
+        public Parcel Parcel { get; set; }
         public bool IsTaken { get; set; }
         public Image Img { get; set; }
-        public int Id { get { return m_Id; } set { m_Id = value; } }
+        public int Id { get; set; }
         public Cell(Canvas context, Coord coord, Coord parcelLockerOffset)
         {
-            m_Parcel = new Parcel();
-            m_Context = context;
-            m_Pos = coord;
-            m_Id = IDGen;
+            Parcel = new Parcel();
+            Id = IDGen;
             IDGen++;
 
             Img = new Image
             {
                 Width = 50,
                 Height = 30,
-                Name = "C"+m_Id,
+                Name = "C"+Id,
                 Source = new BitmapImage(Resources.Instance.Cells[0]),
             };
-            m_Context.Children.Add(Img);
-            Canvas.SetTop(Img, 1*30 + m_Pos.y*30);
-            Canvas.SetLeft(Img, 1*50 + parcelLockerOffset.x + m_Pos.x*50);
+            context.Children.Add(Img);
+            Canvas.SetTop(Img, 1*30 + coord.y*30);
+            Canvas.SetLeft(Img, 1*50 + parcelLockerOffset.x + coord.x*50);
         }
     }
     class ParcelLocker
@@ -108,7 +99,6 @@ namespace ParcelLockers
             Random rand = new Random();
             int randomCellNum;
 
-            
             do
             { 
                 randomCellNum = rand.Next(0, m_Cells.Count);
@@ -121,12 +111,10 @@ namespace ParcelLockers
             m_Cells[randomCellNum].Parcel.Type = ParcelType.SENT;
             m_numShippedParcels++;
 
-            SharedResources.Screen.WaitOne();
-            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+            ScreenOperation.Perform(new Action(() =>
             {
                 m_Cells[randomCellNum].Img.Source = new BitmapImage(Resources.Instance.Cells[1]);
             }));
-            SharedResources.Screen.ReleaseMutex();
         }
 
         public List<Parcel> GetAllShippedParcels()
@@ -141,12 +129,11 @@ namespace ParcelLockers
                     parcelList.Add(cell.Parcel);
                     cell.IsTaken = false;
                     m_numShippedParcels--;
-                    SharedResources.Screen.WaitOne();
-                    SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+
+                    ScreenOperation.Perform(new Action(() =>
                     {
                         cell.Img.Source = new BitmapImage(Resources.Instance.Cells[0]);
                     }));
-                    SharedResources.Screen.ReleaseMutex();
                 }
             }
             return parcelList;
@@ -167,14 +154,10 @@ namespace ParcelLockers
             m_Cells[randomCellNum].Parcel = shippedParcel;
             m_numParcelsToPickUp++;
 
-            SharedResources.Screen.WaitOne();
-
-            SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+            ScreenOperation.Perform(new Action(() =>
             {
                 m_Cells[randomCellNum].Img.Source = new BitmapImage(Resources.Instance.Cells[2]);
             }));
-
-            SharedResources.Screen.ReleaseMutex();
 
             // add the package to the list of packages sent to this addressee
             SharedResources.ParcelsShippedToPeople[shippedParcel.ParcelReceiverId].Add(shippedParcel);
@@ -188,12 +171,10 @@ namespace ParcelLockers
                 {
                     cell.IsTaken = false;
                     m_numParcelsToPickUp--;
-                    SharedResources.Screen.WaitOne();
-                    SharedResources.Window.Dispatcher.BeginInvoke(new Action(() =>
+                    ScreenOperation.Perform(new Action(() =>
                     {
                         cell.Img.Source = new BitmapImage(Resources.Instance.Cells[0]);
                     }));
-                    SharedResources.Screen.ReleaseMutex();
                     return;
                 }
             }
