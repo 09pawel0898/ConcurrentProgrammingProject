@@ -22,7 +22,6 @@ namespace ParcelLockers
         public MainWindow()
         {
             InitializeComponent();
-            //this.Hide();
             simulation = new Simulation(MainCanvas,this);
         }
 

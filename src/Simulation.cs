@@ -59,10 +59,11 @@ namespace ParcelLockers
 
         private void Config()
         {
+            Thread.Sleep(100);
             ScreenOperation.Perform(new Action(() =>
             {
                 while (!SharedResources.Window.IsActive)
-                    Thread.Sleep(1);
+                    Thread.Sleep(10);
                 ConfigWindow configWindow = new ConfigWindow();
                 configWindow.Owner = SharedResources.Window;
                 configWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
@@ -74,7 +75,8 @@ namespace ParcelLockers
             {
                 Thread.Sleep(Timeout.Infinite);
             }
-            catch (ThreadInterruptedException e) { }
+            catch (ThreadInterruptedException e) 
+            {}
         }
 
         /*
