@@ -11,10 +11,11 @@ namespace ParcelLockers
 {
     class SharedResources
     {
-        public static Window Window;
         public static List<ParcelLocker> ParcelLockers = new List<ParcelLocker>();
         public static Mutex Screen = new Mutex();
         public static Mutex SafeSharedResourceOperation = new Mutex();
+
+        public static Window Window;
         public static int[] NumPeopleInQueue = new int[Defines.numParcelLockers];
         public static bool[,] PlacesTakenInQueue = new bool[Defines.numParcelLockers, Defines.maxPeopleInQueue];
         public static List<Parcel>[] ParcelsShippedToPeople;

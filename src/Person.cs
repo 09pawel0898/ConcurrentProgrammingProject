@@ -69,7 +69,8 @@ namespace ParcelLockers
             m_queueId = parcelLockerId;
             GoToProperParcelLockerPath(parcelLockerId);
             ChangeImage(0);
-            TryToQueueUpAndGetToTheParcelLocker(parcelLockerId);
+            if(SharedResources.NumPeopleInQueue[parcelLockerId] < Defines.maxPeopleInQueue)
+                TryToQueueUpAndGetToTheParcelLocker(parcelLockerId);
         }
 
         private void SimulatePickingUpParcel()
@@ -78,7 +79,8 @@ namespace ParcelLockers
             m_queueId = parcelLockerId;
             GoToProperParcelLockerPath(parcelLockerId);
             ChangeImage(0);
-            TryToQueueUpAndGetToTheParcelLocker(parcelLockerId);
+            if (SharedResources.NumPeopleInQueue[parcelLockerId] < Defines.maxPeopleInQueue)
+                TryToQueueUpAndGetToTheParcelLocker(parcelLockerId);
         }
 
         private void GoToProperParcelLockerPath(int pId)
@@ -92,11 +94,6 @@ namespace ParcelLockers
 
         private void TryToQueueUpAndGetToTheParcelLocker(int pId)
         {
-            
-            //DEBUG
-            bool[,] temp = SharedResources.PlacesTakenInQueue;
-            List<Human> listPeople = Simulation.m_People;
-
             Random rand = new Random();
             EnterTheQueue(pId);
 
@@ -106,10 +103,7 @@ namespace ParcelLockers
                 QueuedLock.Enter(pId);
                 //Monitor.Enter(SharedResources.ParcelLockers[pId]);
             }
-            catch(Exception e)
-            {
-                MessageBox.Show(e.Message);
-            }
+            catch (Exception e) { MessageBox.Show(e.Message); }
             try
             {
                 // waiting to get to the first position
@@ -120,7 +114,6 @@ namespace ParcelLockers
                 catch (ThreadInterruptedException e) { }
 
                 // taking selected actions on a shared resource
-                //Thread.Sleep(4000);
                 Thread.Sleep(rand.Next(5000 - Defines.simulationSpeed * 400, 10000 - Defines.simulationSpeed * 700));
 
                 switch (m_currentAction)

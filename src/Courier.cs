@@ -20,9 +20,9 @@ namespace ParcelLockers
     class Courier : Human
     {
         private CourierCar m_courierCar;
-        private List<Parcel>[] m_shippedParcelsToParcelLocker;
-        private int m_currentParcelLocker;
-        private CourierAction m_currentAction;
+        private List<Parcel>[] m_shippedParcelsToParcelLocker;  // list of parcels shipped to every parcel locker
+        private int m_currentParcelLocker;                      // id of parcel locker that is being handled by the courier
+        private CourierAction m_currentAction;                  // current courier action
 
         public Courier(Canvas context)
         {
@@ -45,15 +45,11 @@ namespace ParcelLockers
             int parcelLockerId = 0;
             bool firstIter = true;
 
-            //Init simulation waiting time
-            Thread.Sleep(3000);
-            
             while (true)
             {
                 m_currentParcelLocker = parcelLockerId;
                 ResetPosition();
 
-                //Thread.Sleep(rand.Next(1000, 2000));
                 Thread.Sleep(rand.Next(5000 - Defines.simulationSpeed * 400, 10000 - Defines.simulationSpeed * 500));
 
                 while (SharedResources.ParcelLockers[m_currentParcelLocker].NumShippedParcels < 1)
@@ -70,7 +66,6 @@ namespace ParcelLockers
                 PickUpParcels();
                 ChangeImage(4);
 
-                //Thread.Sleep(rand.Next(1000, 4000));
                 Thread.Sleep(rand.Next(5000 - Defines.simulationSpeed * 400, 10000 - Defines.simulationSpeed * 500));
 
                 if (m_shippedParcelsToParcelLocker[m_currentParcelLocker].Count > 0)
@@ -109,7 +104,8 @@ namespace ParcelLockers
             m_currentAction = CourierAction.TAKE;
             GoToProperParcelLockerPath();
             ChangeImage(0);
-            TryToQueueUpAndGetToTheParcelLocker();
+            if (SharedResources.NumPeopleInQueue[m_queueId] < Defines.maxPeopleInQueue)
+                TryToQueueUpAndGetToTheParcelLocker();
         }
 
         private void SimulateBringingShippedParcels()
@@ -118,7 +114,8 @@ namespace ParcelLockers
             m_currentAction = CourierAction.BRING;
             GoToProperParcelLockerPath();
             ChangeImage(3);
-            TryToQueueUpAndGetToTheParcelLocker();
+            if (SharedResources.NumPeopleInQueue[m_queueId] < Defines.maxPeopleInQueue)
+                TryToQueueUpAndGetToTheParcelLocker();
         }
 
         private void GoToProperParcelLockerPath()
@@ -132,18 +129,10 @@ namespace ParcelLockers
         private void TryToQueueUpAndGetToTheParcelLocker()
         {
             Random rand = new Random();
-            EnterTheQueue(m_currentParcelLocker);
-            int temp = Defines.simulationSpeed;
 
-            try
-            {
-                QueuedLock.Enter(m_currentParcelLocker);
-                //Monitor.Enter(SharedResources.ParcelLockers[m_currentParcelLocker]);
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.Message);
-            }
+            EnterTheQueue(m_currentParcelLocker);
+            QueuedLock.Enter(m_currentParcelLocker);
+            //Monitor.Enter(SharedResources.ParcelLockers[m_currentParcelLocker]);
             try
             {
                 // waiting to get to the first position

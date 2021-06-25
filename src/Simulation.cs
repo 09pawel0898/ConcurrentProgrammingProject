@@ -84,8 +84,6 @@ namespace ParcelLockers
          */
         private void UpdatePeoplePositions()
         {
-            SharedResources.SafeSharedResourceOperation.WaitOne();
-
             foreach (Human human in m_People)
             {
                 if (human.WaitingInQueue && !human.CameToTheParcelLocker)
@@ -111,7 +109,6 @@ namespace ParcelLockers
                     }
                 }
             }
-            SharedResources.SafeSharedResourceOperation.ReleaseMutex();
         }
 
         private void UpdateLabels()

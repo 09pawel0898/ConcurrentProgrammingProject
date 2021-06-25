@@ -87,20 +87,16 @@ namespace ParcelLockers
         protected void EnterTheQueue(int pId)
         {
             SharedResources.SafeSharedResourceOperation.WaitOne();
-
-            //m_posInQueue = ParcelLocker.GetLastFreePositionInQueue(pId);
             m_posInQueue = SharedResources.NumPeopleInQueue[pId];
-
             SharedResources.PlacesTakenInQueue[pId, SharedResources.NumPeopleInQueue[pId]] = true;
             SharedResources.NumPeopleInQueue[pId]++;
+            SharedResources.SafeSharedResourceOperation.ReleaseMutex();
 
             ScreenOperation.Perform(new Action(() =>
             {
                 Canvas.SetZIndex(Img, ZIndexGen++);
             }));
             m_waitingInQueue = true;
-
-            SharedResources.SafeSharedResourceOperation.ReleaseMutex();
         }
 
         protected void LeaveTheQueue(int pId)

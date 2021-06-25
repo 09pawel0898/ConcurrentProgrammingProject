@@ -7,7 +7,6 @@ public sealed class QueuedLock
     private static volatile int[] ticketsCount = { 0, 0, 0 };
     private static volatile int[] ticketToRide = { 1, 1, 1 };
 
-
     public static void Enter(int parcelLockerId)
     {
         int myTicket = Interlocked.Increment(ref ticketsCount[parcelLockerId]);
