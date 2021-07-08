@@ -12,7 +12,7 @@ The intention of the task was to correctly identify the shared resources and syn
 access to the critical section using the best-suited synchronization mechanism.
 The program must meet the safety property and the lifetime property.
 
-### Idea for solution
+## Idea for solution
 
 Implementation language : C#
 
@@ -21,6 +21,8 @@ The monitors themselves implement FIFO access acquiring, but there are exception
 on monitors and provides FIFO.
 The screen is being accessed asynchronously so i used mutex for it.
 Some other shared memory operations are protected by mutex too.
+
+
 
 
 ![ScreenShot](screenshot1.jpg)
